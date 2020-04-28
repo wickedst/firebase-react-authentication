@@ -17,14 +17,9 @@ const SignUp = () => {
     username: "",
     email: "",
     password: "",
-    phone: "",
   } as FormItems);
 
   const history = useHistory();
-
-  const handleClick = () => {
-    history.push("/auth/login");
-  };
 
   const handleChange = (event: any) => {
     event.persist();
@@ -89,7 +84,7 @@ const SignUp = () => {
         <br />
         <button type="submit">Sign Up</button>
         <p>Already have account?</p>
-        <button onClick={handleClick}>Login</button>
+        <button onClick={() => history.push("/auth/login")}>Login</button>
       </form>
     </div>
   );
