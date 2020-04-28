@@ -1,0 +1,24 @@
+/* make the customizations */
+$theme-colors: (
+  "info": teal,
+  "danger": tomato,
+);
+
+$spacer: 2rem;
+$enable-transitions: false;
+
+$theme-colors: map-remove(
+  $theme-colors,
+  "blue",
+  "indigo",
+  "purple",
+  "pink",
+  "orange",
+  "yellow",
+  "green",
+  "teal",
+  "cyan"
+) !default;
+
+/* import bootstrap to set changes */
+@import "~bootstrap/scss/bootstrap";

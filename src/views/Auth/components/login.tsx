@@ -5,6 +5,18 @@ import "firebase/auth";
 import "firebase/firestore";
 import { AuthContext } from "../../../AuthProvider";
 
+import { Formik } from "formik";
+import { Form as FormikForm } from "formik";
+import FormField from "../../../components/FormField";
+import Form from "react-bootstrap/Form";
+import Spinner from "react-bootstrap/Spinner";
+import * as yup from "yup";
+
+const schema = yup.object({
+  email: yup.string().email().required(),
+  password: yup.string().required(),
+});
+
 interface UserData {
   email: string;
   password: string;
@@ -14,24 +26,27 @@ const Login = () => {
   const authContext = useContext(AuthContext);
   const { loadingAuthState } = useContext(AuthContext);
   const history = useHistory();
-  const [values, setValues] = useState({
-    email: "",
-    password: "",
-  } as UserData);
+
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  // prettier-ignore
+  const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
 
   const db = firebase.firestore();
 
   useEffect(() => {
+    // check if user is logged in
     firebase
       .auth()
       .getRedirectResult()
+      // if not logged in, do nothing and display form
       .then((result) => {
         if (!result || !result.user || !firebase.auth().currentUser) {
           return;
         }
 
+        // if logged in redirect to dashboard
         return setUserProfile().then(() => {
-          redirectToTargetPage();
+          history.push("/dashboard");
         });
       })
       .catch((error) => {
@@ -55,8 +70,8 @@ const Login = () => {
         return;
       })
       .catch((error) => {
+        // handleError
         console.log(error.message);
-        alert(error.message);
       });
   };
 
@@ -68,34 +83,23 @@ const Login = () => {
     return doc.exists;
   };
 
-  const redirectToTargetPage = () => {
-    history.push("/dashboard");
-  };
-
-  const handleClick = () => {};
-
-  const handleChange = (event: any) => {
-    event.persist();
-    setValues((values) => ({
-      ...values,
-      [event.target.name]: event.target.value,
-    }));
-  };
-
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
+  const handleLogin = (data: any) => {
+    setIsSubmitting(true);
 
     firebase
       .auth()
-      .signInWithEmailAndPassword(values.email, values.password)
+      .signInWithEmailAndPassword(data.email, data.password)
       .then((res) => {
+        setIsSubmitting(false);
         authContext.setUser(res);
         console.log(res, "res");
         history.push("/dashboard");
       })
       .catch((error) => {
+        setIsSubmitting(false);
+        // handleError
+        setAlert({ show: true, type: "danger", messages: [error.message] });
         console.log(error.message);
-        alert(error.message);
       });
   };
 
@@ -140,50 +144,67 @@ const Login = () => {
   return (
     <div style={{ textAlign: "center" }}>
       <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="email"
-          value={values.email}
-          placeholder="Enter your Email"
-          onChange={handleChange}
-        />
-        <br />
-        <br />
-        <input
-          type="password"
-          name="password"
-          value={values.password}
-          placeholder="Enter your Password"
-          onChange={handleChange}
-        />
-        <br />
-        <br />
-        <button>Login</button>
-        <p>Not logged in yet?</p>
-        <button onClick={() => history.push("/auth/signup")}>
-          SignUp
-        </button>{" "}
-        <br />
-        <br />
-      </form>
+      <Formik
+        validationSchema={schema}
+        initialValues={{
+          email: "",
+          password: "",
+        }}
+        onSubmit={async (data) => {
+          handleLogin(data);
+        }}
+      >
+        {() => (
+          <FormikForm className="offset-md-3 col-md-6">
+            {alert.show && (
+              <div className={`alert alert-${alert.type} small`}>
+                {alert.messages.map((message, index) => (
+                  <div key={index}>{message}</div>
+                ))}
+              </div>
+            )}
+            <Form.Group>
+              <FormField
+                placeholder="Email Address"
+                name="email"
+                type="input"
+              />
+            </Form.Group>
+            <Form.Group>
+              <FormField
+                placeholder="Password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+              />
+            </Form.Group>
+            {/* prettier-ignore */}
+            <button disabled={isSubmitting} type="submit" className={`btn btn-primary btn-block`} >
+              {isSubmitting ? (
+                // prettier-ignore
+                <> <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /><span className="sr-only">Loading...</span> </>
+              ) : (
+                "Login"
+              )}
+            </button>
+            {/* prettier-ignore */}
+            <p className="small mt-2"> Not registered? <button onClick={() => history.push("/auth/signup")} className="btn btn-sm btn-link" > Sign up </button> </p>
+          </FormikForm>
+        )}
+      </Formik>
 
-      <p>Social SignUp</p>
-      <button onClick={() => handleSocialClick("Facebook")}>
-        SignIn with Facebook
-      </button>
-      <br />
-      <br />
-      <button onClick={() => handleSocialClick("Google")}>
-        SignIn with Google
-      </button>
-      <br />
-      <br />
-      <button onClick={() => handleSocialClick("Twitter")}>
-        SignIn with Twitter
-      </button>
-      <br />
-      <br />
+      <div className="signup-social mt-4">
+        <h2>Social Login</h2>
+        <button className="btn" onClick={() => handleSocialClick("Facebook")}>
+          SignIn with Facebook
+        </button>
+        <button className="btn" onClick={() => handleSocialClick("Google")}>
+          SignIn with Google
+        </button>
+        <button className="btn" onClick={() => handleSocialClick("Twitter")}>
+          SignIn with Twitter
+        </button>
+      </div>
     </div>
   );
 };

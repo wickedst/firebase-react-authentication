@@ -1,10 +1,12 @@
-import React from 'react';
-import './App.css';
-import ApplicationRoutes from './config/ApplicationRoutes';
+import React from "react";
+import "./scss/App.scss";
+import ApplicationRoutes from "./config/ApplicationRoutes";
 
 function App() {
   return (
-    <ApplicationRoutes />
+    <div className="container">
+      <ApplicationRoutes />
+    </div>
   );
 }
 
