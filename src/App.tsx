@@ -3,11 +3,7 @@ import "./scss/App.scss";
 import ApplicationRoutes from "./config/ApplicationRoutes";
 
 function App() {
-  return (
-    <div className="container">
-      <ApplicationRoutes />
-    </div>
-  );
+  return <ApplicationRoutes />;
 }
 
 export default App;
