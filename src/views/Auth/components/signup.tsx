@@ -5,87 +5,127 @@ import "firebase/auth";
 import "firebase/firestore";
 import { AuthContext } from "../../../AuthProvider";
 
-interface FormItems {
-  username: string;
-  email: string;
-  password: string;
-}
+import { Formik } from "formik";
+import { Form as FormikForm } from "formik";
+import FormField from "../../../components/FormField";
+import Form from "react-bootstrap/Form";
+import Spinner from "react-bootstrap/Spinner";
+import * as yup from "yup";
+
+const schema = yup.object({
+  username: yup
+    .string()
+    .min(3)
+    .max(15)
+    .matches(
+      /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/,
+      "Can not contain spaces or special characters"
+    ),
+  email: yup.string().email().required(),
+  password: yup
+    .string()
+    .required()
+    .matches(
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+      "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character"
+    ),
+});
 
 const SignUp = () => {
   const authContext = useContext(AuthContext);
-  const [values, setValues] = useState({
-    username: "",
-    email: "",
-    password: "",
-  } as FormItems);
-
   const history = useHistory();
 
-  const handleChange = (event: any) => {
-    event.persist();
-    setValues((values) => ({
-      ...values,
-      [event.target.name]: event.target.value,
-    }));
-  };
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  // prettier-ignore
+  const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
 
-  const handleSubmit = (event: any) => {
-    event?.preventDefault();
-    console.log(values, "values");
+  const handleSignup = (data: any) => {
+    // check if username exists in cloud function
+    setIsSubmitting(true);
     firebase
       .auth()
-      .createUserWithEmailAndPassword(values.email, values.password)
+      .createUserWithEmailAndPassword(data.email, data.password)
       .then((userCredential: firebase.auth.UserCredential) => {
         authContext.setUser(userCredential);
+        // check if user exists
         const db = firebase.firestore();
         db.collection("Users")
           .doc(userCredential.user!.uid)
           .set({
-            email: values.email,
-            username: values.username,
+            email: data.email,
+            username: data.username,
           })
           .then(() => {
-            console.log("ok");
+            setIsSubmitting(false);
             history.push("/dashboard");
           })
           .catch((error) => {
+            setIsSubmitting(false);
+            setAlert({ show: true, type: "danger", messages: [error.message] });
             console.log(error.message);
-            alert(error.message);
           });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        setAlert({ show: true, type: "danger", messages: [error.message] });
+        console.log(error.message);
       });
   };
   return (
-    <div style={{ textAlign: "center" }}>
-      <h1>Sign Up</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          onChange={handleChange}
-        />
-        <br />
-        <br />
-        <input
-          type="text"
-          name="email"
-          placeholder="Enter your Email"
-          onChange={handleChange}
-        />
-        <br />
-        <br />
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter your Password"
-          onChange={handleChange}
-        />
-        <br />
-        <br />
-        <button type="submit">Sign Up</button>
-        <p>Already have account?</p>
-        <button onClick={() => history.push("/auth/login")}>Login</button>
-      </form>
+    <div className="text-center">
+      <h1>Sign up</h1>
+      <Formik
+        validationSchema={schema}
+        initialValues={{
+          username: "",
+          email: "",
+          password: "",
+        }}
+        onSubmit={(data) => {
+          handleSignup(data);
+        }}
+      >
+        {() => (
+          <FormikForm className="offset-md-3 col-md-6">
+            {alert.show && (
+              <div className={`alert alert-${alert.type} small`}>
+                {alert.messages.map((message, index) => (
+                  <div key={index}>{message}</div>
+                ))}
+              </div>
+            )}
+            <Form.Group>
+              <FormField placeholder="Username" name="username" type="input" />
+            </Form.Group>
+            <Form.Group>
+              <FormField
+                placeholder="Email Address"
+                name="email"
+                type="input"
+              />
+            </Form.Group>
+            <Form.Group>
+              <FormField
+                placeholder="Password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+              />
+            </Form.Group>
+            {/* prettier-ignore */}
+            <button disabled={isSubmitting} type="submit" className={`btn btn-primary btn-block`} >
+              {isSubmitting ? (
+                // prettier-ignore
+                <> <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /><span className="sr-only">Loading...</span> </>
+              ) : (
+                "Login"
+              )}
+            </button>
+            {/* prettier-ignore */}
+            <p className="small mt-2">Already registered? <button onClick={() => history.push("/auth/login")} className="btn btn-sm btn-link" >Login</button> </p>
+          </FormikForm>
+        )}
+      </Formik>
     </div>
   );
 };

@@ -17,11 +17,6 @@ const schema = yup.object({
   password: yup.string().required(),
 });
 
-interface UserData {
-  email: string;
-  password: string;
-}
-
 const Login = () => {
   const authContext = useContext(AuthContext);
   const { loadingAuthState } = useContext(AuthContext);
