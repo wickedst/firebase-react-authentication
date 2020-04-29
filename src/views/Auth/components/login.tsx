@@ -35,7 +35,10 @@ const Login = () => {
       .getRedirectResult()
       // if not logged in, do nothing and display form
       .then((result) => {
-        if (!result || !result.user || !firebase.auth().currentUser) {
+        if (result.user) {
+          console.log("firebase.auth", firebase.auth());
+          history.push("/dashboard");
+        } else if (!result || !result.user || !firebase.auth().currentUser) {
           return;
         }
 
@@ -47,7 +50,7 @@ const Login = () => {
       .catch((error) => {
         console.log(error, "error");
       });
-  }, []);
+  });
 
   const setUserProfile = async () => {
     if (await isUserExists()) {
