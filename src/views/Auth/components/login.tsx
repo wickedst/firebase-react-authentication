@@ -133,14 +133,17 @@ const Login = () => {
 
   if (loadingAuthState) {
     return (
-      <div>
-        <h1>Loading...</h1>
+      <div
+        className="position-absolute d-flex w-100 h-100 align-items-center justify-content-center"
+        style={{ top: 0 }}
+      >
+        <Spinner animation="grow" variant="primary" />
       </div>
     );
   }
 
   return (
-    <div style={{ textAlign: "center" }}>
+    <div className="container py-4 text-center">
       <h1>Login</h1>
       <Formik
         validationSchema={schema}

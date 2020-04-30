@@ -15,6 +15,7 @@ import * as yup from "yup";
 const schema = yup.object({
   username: yup
     .string()
+    .required()
     .min(3)
     .max(15)
     .matches(
@@ -72,7 +73,7 @@ const SignUp = () => {
       });
   };
   return (
-    <div className="text-center">
+    <div className="container py-4 text-center">
       <h1>Sign up</h1>
       <Formik
         validationSchema={schema}
