@@ -7,7 +7,7 @@ import { AuthContext } from "../../../AuthProvider";
 
 import { Formik } from "formik";
 import { Form as FormikForm } from "formik";
-import FormField from "../../../components/FormField";
+import FormField from "../../../components/FormFields/FormField";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
 import * as yup from "yup";
