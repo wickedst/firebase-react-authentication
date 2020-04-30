@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import firebase from "../../../firebase";
 import "firebase/auth";
 import "firebase/firestore";
@@ -123,7 +123,7 @@ const SignUp = () => {
               )}
             </button>
             {/* prettier-ignore */}
-            <p className="small mt-2">Already registered? <button onClick={() => history.push("/auth/login")} className="btn btn-sm btn-link" >Login</button> </p>
+            <p className="small mt-2">Already registered? <Link to="/auth/login">Login</Link></p>
           </FormikForm>
         )}
       </Formik>

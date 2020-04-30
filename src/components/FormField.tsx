@@ -15,7 +15,9 @@ const MyField = (props: any) => {
         isValid={meta.touched && !meta.error && meta.value}
         isInvalid={meta.touched && meta.error}
       />
-      <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+      {props.useValidFeedback ? (
+        <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+      ) : null}
       <Form.Control.Feedback type="invalid">{errorText}</Form.Control.Feedback>
     </>
   );

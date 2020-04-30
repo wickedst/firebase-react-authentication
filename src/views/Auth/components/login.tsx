@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import firebase from "../../../firebase";
 import "firebase/auth";
 import "firebase/firestore";
@@ -74,6 +74,7 @@ const Login = () => {
   };
 
   const isUserExists = async () => {
+    // what if user does not exist? Send alert
     const doc = await db
       .collection("users")
       .doc(firebase.auth().currentUser!.uid)
@@ -189,7 +190,9 @@ const Login = () => {
               )}
             </button>
             {/* prettier-ignore */}
-            <p className="small mt-2"> Not registered? <button onClick={() => history.push("/auth/signup")} className="btn btn-sm btn-link" > Sign up </button> </p>
+            <p className="small mt-2 mb-1">Not registered? <Link to="/auth/signup">Sign up</Link></p>
+            {/* prettier-ignore */}
+            <p className="small">Forgot Password? <Link to="/forgot-password">Click here</Link></p>
           </FormikForm>
         )}
       </Formik>

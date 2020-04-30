@@ -11,6 +11,7 @@ import LoggedInRoute from "./routes/LoggedInRoute";
 import { DashboardRoutes } from "../views/Dashboard";
 import { Home } from "../views/Home/components";
 import Navbar from "../components/Navbar/navbar";
+import { ForgotPassword } from "../views/ForgotPassword/components";
 
 const ApplicationRoutes = () => {
   return (
@@ -21,6 +22,7 @@ const ApplicationRoutes = () => {
         <LoggedInRoute path="/auth" component={AuthRoutes} />
         <PrivateRoute exact path="/dashboard" component={DashboardRoutes} />
         <Route path="/auth" component={AuthRoutes} />
+        <Route exact path="/forgot-password" component={ForgotPassword} />
         {/* <Redirect to="/auth" from="/" /> */}
         {/* <Route path="/" component={AuthRoutes} /> */}
       </Switch>
