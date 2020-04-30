@@ -1,28 +1,19 @@
-import React, { useState, useEffect } from "react";
-import firebase from "../../../firebase";
-import "firebase/firestore";
+import React, { useContext } from "react";
+import { AuthContext } from "../../../AuthProvider";
+import Spinner from "react-bootstrap/Spinner";
 
 const Dashboard = () => {
-  const [userName, setUserName] = useState();
-
-  useEffect(() => {
-    const db = firebase.firestore();
-    db.collection("Users")
-      .doc(firebase.auth().currentUser!.uid)
-      .get()
-      .then((res) => {
-        const user = res.data();
-        if (user) {
-          setUserName(user["username"]);
-        }
-      });
-  }, []);
+  const { userProfile } = useContext(AuthContext);
 
   return (
-    <div style={{ textAlign: "center" }}>
+    <div className="container text-center py-4">
       <h1>Dashboard</h1>
-      <h2>Welcome to Dashboard!</h2>
-      <h3>{userName}</h3>
+
+      {userProfile ? (
+        userProfile.username
+      ) : (
+        <Spinner animation="grow" variant="primary" />
+      )}
     </div>
   );
 };

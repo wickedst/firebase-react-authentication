@@ -1,37 +1,62 @@
 import React, { useEffect, useState } from "react";
 import firebase from "./firebase";
+import "firebase/firestore";
 
 type ContextProps = {
-    user: firebase.User | null;
-    authenticated: boolean;
-    setUser: any;
-    loadingAuthState: boolean;
+  user: firebase.User | null;
+  userProfile: firebase.firestore.DocumentData | null;
+  authenticated: boolean;
+  setUser: any;
+  loadingAuthState: boolean;
 };
 
 export const AuthContext = React.createContext<Partial<ContextProps>>({});
 
 export const AuthProvider = ({ children }: any) => {
-    const [user, setUser] = useState(null as firebase.User | null);
-    const [loadingAuthState, setLoadingAuthState] = useState(true);
+  const [user, setUser] = useState(null as firebase.User | null);
+  const [userProfile, setUserProfile] = useState(
+    null as firebase.firestore.DocumentData | null
+  );
+  const [loadingAuthState, setLoadingAuthState] = useState(true);
 
-    useEffect(() => {
-        firebase.auth().onAuthStateChanged((user: any) => {
-            setUser(user);
-            setLoadingAuthState(false);
-            console.log(user, 'ap user');
-            console.log(user !== null, 'ap authenticated');
-        });
-    }, []);
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged((user: any) => {
+      setUser(user);
+      setLoadingAuthState(false);
+      console.log(user, "ap user");
+      console.log(user !== null, "ap authenticated");
 
-    return (
-        <AuthContext.Provider 
-            value={{
-                user,
-                authenticated: user !== null,
-                setUser,
-                loadingAuthState
-            }}>
-                {children}
-        </AuthContext.Provider>
-    );
-}
+      // Get user profile
+      if (user !== null) {
+        const db = firebase.firestore();
+        db.collection("Users")
+          .doc(firebase.auth().currentUser!.uid)
+          .get()
+          .then((res) => {
+            const user = res.data();
+            if (user) {
+              console.log("Set user profile: ", user);
+              setUserProfile(user);
+            }
+          });
+      } else {
+        console.log("Emptied user profile");
+        setUserProfile(null);
+      }
+    });
+  }, []);
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        userProfile,
+        authenticated: user !== null,
+        setUser,
+        loadingAuthState,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};

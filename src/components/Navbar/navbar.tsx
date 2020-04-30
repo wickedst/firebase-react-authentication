@@ -7,7 +7,7 @@ import { AuthContext } from "../../AuthProvider";
 import { useHistory, Link } from "react-router-dom";
 
 const MyNavbar = () => {
-  const { loadingAuthState, user } = useContext(AuthContext);
+  const { loadingAuthState, user, userProfile } = useContext(AuthContext);
   const history = useHistory();
 
   const handleLogout = () => {
@@ -19,17 +19,19 @@ const MyNavbar = () => {
       });
   };
 
-  const NavLoggedIn = () => (
-    <Nav>
-      <NavDropdown title="My Account" id="collasible-nav-dropdown">
-        <NavDropdown.Item to="/dashboard" as={Link}>
-          Dashboard
-        </NavDropdown.Item>
-        <NavDropdown.Divider />
-        <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
-      </NavDropdown>
-    </Nav>
-  );
+  const NavLoggedIn = () =>
+    userProfile ? (
+      <Nav>
+        <NavDropdown title={userProfile.username} id="collasible-nav-dropdown">
+          <NavDropdown.Item to="/dashboard" as={Link}>
+            Dashboard
+          </NavDropdown.Item>
+          <NavDropdown.Divider />
+          <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+        </NavDropdown>
+      </Nav>
+    ) : null;
+
   const NavLoggedOut = () =>
     !loadingAuthState ? (
       <Nav>
