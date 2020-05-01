@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  // userPublic
+  match /Users/{userId} {
+    // allow authenticated-users to read public profiles
+    allow read: if request.auth.uid != null;
+    // only allow owner to create/update their public profile
+    allow create, write, update: if request.auth.uid == userId;
+  }
+}

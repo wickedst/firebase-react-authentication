@@ -1,0 +1,15 @@
+{
+  "functions": {
+    "predeploy": "yarn --prefix \"$RESOURCE_DIR\" build",
+    "source": "functions"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "predeploy": "yarn build",
+    "public": "build",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+  }
+}

@@ -1,10 +1,12 @@
 {
-  "name": "react-authentication",
+  "name": "firebase-react-ts-starter",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "bootstrap": "^4.4.1",
     "firebase": "^7.9.1",
+    "firebase-admin": "^8.11.0",
+    "firebase-functions": "^3.6.1",
     "formik": "^2.1.4",
     "node-sass": "^4.14.0",
     "react": "^16.12.0",
