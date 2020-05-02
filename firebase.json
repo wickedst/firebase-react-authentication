@@ -1,6 +1,6 @@
 {
   "functions": {
-    "predeploy": "yarn --prefix \"$RESOURCE_DIR\" build",
+    "predeploy": ["npm --prefix functions run build"],
     "source": "functions"
   },
   "firestore": {
