@@ -3,6 +3,7 @@ import { useHistory, Link } from "react-router-dom";
 import firebase from "../../../firebase";
 import "firebase/auth";
 import "firebase/firestore";
+import "firebase/functions";
 import { AuthContext } from "../../../AuthProvider";
 
 import { Formik } from "formik";
@@ -11,6 +12,19 @@ import FormField from "../../../components/FormFields/FormField";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
 import * as yup from "yup";
+
+yup.addMethod(yup.string, "checkUsername", function (
+  message: string = "Username taken"
+) {
+  return this.test("test-name", message, function (
+    value
+  ): any | yup.ValidationError {
+    const checkUsername = firebase.functions().httpsCallable("checkUsername");
+    return checkUsername({ username: value }).then(function (result) {
+      return !result.data;
+    });
+  });
+});
 
 const schema = yup.object({
   username: yup
@@ -21,7 +35,9 @@ const schema = yup.object({
     .matches(
       /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/,
       "Can not contain spaces or special characters"
-    ),
+    )
+    //@ts-ignore
+    .checkUsername(),
   email: yup.string().email().required(),
   password: yup
     .string()
