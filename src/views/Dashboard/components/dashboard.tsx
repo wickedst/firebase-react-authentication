@@ -21,8 +21,6 @@ const schema = yup.object({
 
 const UploadProfilePicture = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  // prettier-ignore
-  const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
 
   return (
     <Formik
@@ -31,18 +29,13 @@ const UploadProfilePicture = () => {
         profilePicture: "",
       }}
       onSubmit={(data) => {
+        setIsSubmitting(true);
         imageUpload(data.profilePicture);
+        setIsSubmitting(false);
       }}
     >
-      {(profilePicture) => (
+      {() => (
         <FormikForm className="py-3 offset-md-3 col-md-6">
-          {alert.show && (
-            <div className={`alert alert-${alert.type} small`}>
-              {alert.messages.map((message, index) => (
-                <div key={index}>{message}</div>
-              ))}
-            </div>
-          )}
           <Form.Group>
             <FormFieldFile
               name="profilePicture"

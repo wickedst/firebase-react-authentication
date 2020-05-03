@@ -1,10 +1,9 @@
-import React, { useState, useContext } from "react";
-import { useHistory, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import firebase from "../../../firebase";
 import "firebase/auth";
 import "firebase/firestore";
 import "firebase/functions";
-import { AuthContext } from "../../../AuthProvider";
 
 import { Formik } from "formik";
 import { Form as FormikForm } from "formik";
@@ -15,9 +14,6 @@ import schema from "../../../schemas/signup.schema";
 import slugify from "slugify";
 
 const SignUp = () => {
-  const authContext = useContext(AuthContext);
-  const history = useHistory();
-
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // prettier-ignore
   const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
@@ -27,14 +23,12 @@ const SignUp = () => {
     email: string;
     password: string;
   }) => {
-    const usernameSlug = slugify(data.username, {
-      remove: /[$*+~.,()'"!\-:@]/g,
-      lower: true,
-    });
     setIsSubmitting(true);
+    // prettier-ignore
+    const usernameSlug = slugify(data.username, { remove: /[$*+~.,()'"!\-:@]/g, lower: true, });
 
-    let ref = firebase.firestore().collection("users").doc(usernameSlug);
-    ref
+    let userDoc = firebase.firestore().collection("users").doc(usernameSlug);
+    userDoc
       .get()
       .then((doc) => {
         if (!doc.exists) {
@@ -43,7 +37,7 @@ const SignUp = () => {
             .createUserWithEmailAndPassword(data.email, data.password)
             .then((userCredential: firebase.auth.UserCredential) => {
               // prettier-ignore
-              ref.set({ email: data.email, username: data.username, uid: userCredential.user!.uid, });
+              userDoc.set({ email: data.email, username: data.username, uid: userCredential.user!.uid, });
             })
             // if doc/username exists
             .catch((error: any) => {
@@ -90,7 +84,12 @@ const SignUp = () => {
               </div>
             )}
             <Form.Group>
-              <FormField placeholder="Username" name="username" type="input" />
+              <FormField
+                placeholder="Username"
+                name="username"
+                type="input"
+                autoComplete="username"
+              />
             </Form.Group>
             <Form.Group>
               <FormField
