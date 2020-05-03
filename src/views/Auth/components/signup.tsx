@@ -11,42 +11,8 @@ import { Form as FormikForm } from "formik";
 import FormField from "../../../components/FormFields/FormField";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
-import * as yup from "yup";
-
-yup.addMethod(yup.string, "checkUsername", function (
-  message: string = "Username taken"
-) {
-  return this.test("test-name", message, function (
-    value
-  ): any | yup.ValidationError {
-    const checkUsername = firebase.functions().httpsCallable("checkUsername");
-    return checkUsername({ username: value }).then(function (result) {
-      return !result.data;
-    });
-  });
-});
-
-const schema = yup.object({
-  username: yup
-    .string()
-    .required()
-    .min(3)
-    .max(15)
-    .matches(
-      /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/,
-      "Can not contain spaces or special characters"
-    )
-    //@ts-ignore
-    .checkUsername(),
-  email: yup.string().email().required(),
-  password: yup
-    .string()
-    .required()
-    .matches(
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-      "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character"
-    ),
-});
+import schema from "../../../schemas/signup.schema";
+import slugify from "slugify";
 
 const SignUp = () => {
   const authContext = useContext(AuthContext);
@@ -56,33 +22,45 @@ const SignUp = () => {
   // prettier-ignore
   const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
 
-  const handleSignup = (data: any) => {
-    // check if username exists in cloud function
+  const handleSignup = (data: {
+    username: string;
+    email: string;
+    password: string;
+  }) => {
+    const usernameSlug = slugify(data.username, {
+      remove: /[$*+~.,()'"!\-:@]/g,
+      lower: true,
+    });
     setIsSubmitting(true);
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(data.email, data.password)
-      .then((userCredential: firebase.auth.UserCredential) => {
-        authContext.setUser(userCredential);
-        // check if user exists
-        const db = firebase.firestore();
-        db.collection("Users")
-          .doc(userCredential.user!.uid)
-          .set({
-            email: data.email,
-            username: data.username,
-          })
-          .then(() => {
-            setIsSubmitting(false);
-            history.push("/dashboard");
-          })
-          .catch((error) => {
-            setIsSubmitting(false);
-            setAlert({ show: true, type: "danger", messages: [error.message] });
-            console.log(error.message);
-          });
+
+    let ref = firebase.firestore().collection("users").doc(usernameSlug);
+    ref
+      .get()
+      .then((doc) => {
+        if (!doc.exists) {
+          firebase
+            .auth()
+            .createUserWithEmailAndPassword(data.email, data.password)
+            .then((userCredential: firebase.auth.UserCredential) => {
+              // prettier-ignore
+              ref.set({ email: data.email, username: data.username, uid: userCredential.user!.uid, });
+            })
+            // if doc/username exists
+            .catch((error: any) => {
+              setIsSubmitting(false);
+              // prettier-ignore
+              setAlert({ show: true, type: "danger", messages: [error.message] });
+            });
+        } else {
+          // prettier-ignore
+          setAlert({ show: true, type: "danger", messages: ["Username taken"] });
+        }
       })
-      .catch((error) => {
+      .then(() => {
+        // Will automatically push to dashboard
+        setIsSubmitting(false);
+      })
+      .catch((error: any) => {
         setIsSubmitting(false);
         setAlert({ show: true, type: "danger", messages: [error.message] });
         console.log(error.message);
@@ -135,7 +113,7 @@ const SignUp = () => {
                 // prettier-ignore
                 <> <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /><span className="sr-only">Loading...</span> </>
               ) : (
-                "Login"
+                "Sign Up"
               )}
             </button>
             {/* prettier-ignore */}
