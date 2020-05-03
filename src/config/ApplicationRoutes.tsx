@@ -11,7 +11,7 @@ import LoggedInRoute from "./routes/LoggedInRoute";
 import { DashboardRoutes } from "../views/Dashboard";
 import { Home } from "../views/Home/components";
 import Navbar from "../components/Navbar/navbar";
-import Toasts from "../components/Toast/toast";
+import Toasts from "../components/Toast/toastContainer";
 import { ForgotPassword } from "../views/ForgotPassword/components";
 
 const ApplicationRoutes = () => {

@@ -5,7 +5,7 @@ $theme-colors: (
 );
 
 $spacer: 2rem;
-$enable-transitions: false;
+$enable-transitions: true;
 
 $theme-colors: map-remove(
   $theme-colors,

@@ -7,7 +7,9 @@ import { AuthContext } from "../../AuthProvider";
 import { useHistory, Link } from "react-router-dom";
 
 const MyNavbar = () => {
-  const { loadingAuthState, user, userProfile } = useContext(AuthContext);
+  const { loadingAuthState, user, userProfile, setToasts } = useContext(
+    AuthContext
+  );
   const history = useHistory();
 
   const handleLogout = () => {
@@ -16,6 +18,10 @@ const MyNavbar = () => {
       .signOut()
       .then(() => {
         history.push("/");
+        setToasts((prevToasts: any) => [
+          ...prevToasts,
+          { variant: "info", message: "Logged out" },
+        ]);
       });
   };
 

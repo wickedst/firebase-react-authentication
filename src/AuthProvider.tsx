@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import firebase from "./firebase";
 import "firebase/firestore";
 
+interface Toast {
+  message: string;
+  variant: string;
+}
+
 type ContextProps = {
   user: firebase.User | null;
   userProfile: firebase.firestore.DocumentData | null;
   authenticated: boolean;
   setUser: any;
   loadingAuthState: boolean;
-  toasts: unknown;
+  toasts: { message: string; variant: string }[];
   setToasts: any;
 };
 
@@ -20,7 +25,7 @@ export const AuthProvider = ({ children }: any) => {
     null as firebase.firestore.DocumentData | null
   );
   const [loadingAuthState, setLoadingAuthState] = useState(true);
-  const [toasts, setToasts] = useState([{}]);
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user: any) => {
@@ -41,10 +46,6 @@ export const AuthProvider = ({ children }: any) => {
               if (user) {
                 console.log("Set user profile: ", user);
                 setUserProfile(user);
-                setToasts([
-                  ...toasts,
-                  { variant: "success", message: "Logged in" },
-                ]);
               }
             });
           });

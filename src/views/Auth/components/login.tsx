@@ -90,6 +90,10 @@ const Login = () => {
       .signInWithEmailAndPassword(data.email, data.password)
       .then((res) => {
         setIsSubmitting(false);
+        authContext.setToasts((prevToasts: any) => [
+          ...prevToasts,
+          { variant: "success", message: "Logged in" },
+        ]);
         authContext.setUser(res);
         console.log(res, "res");
         history.push("/dashboard");
