@@ -19,7 +19,7 @@ const schema = yup.object({
 
 const Login = () => {
   const authContext = useContext(AuthContext);
-  const { loadingAuthState } = useContext(AuthContext);
+  const { loadingAuthState, setToasts } = useContext(AuthContext);
   const history = useHistory();
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);

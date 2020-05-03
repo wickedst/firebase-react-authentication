@@ -8,6 +8,8 @@ type ContextProps = {
   authenticated: boolean;
   setUser: any;
   loadingAuthState: boolean;
+  toasts: unknown;
+  setToasts: any;
 };
 
 export const AuthContext = React.createContext<Partial<ContextProps>>({});
@@ -18,6 +20,7 @@ export const AuthProvider = ({ children }: any) => {
     null as firebase.firestore.DocumentData | null
   );
   const [loadingAuthState, setLoadingAuthState] = useState(true);
+  const [toasts, setToasts] = useState([{}]);
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user: any) => {
@@ -38,6 +41,10 @@ export const AuthProvider = ({ children }: any) => {
               if (user) {
                 console.log("Set user profile: ", user);
                 setUserProfile(user);
+                setToasts([
+                  ...toasts,
+                  { variant: "success", message: "Logged in" },
+                ]);
               }
             });
           });
@@ -56,6 +63,8 @@ export const AuthProvider = ({ children }: any) => {
         authenticated: user !== null,
         setUser,
         loadingAuthState,
+        toasts,
+        setToasts,
       }}
     >
       {children}

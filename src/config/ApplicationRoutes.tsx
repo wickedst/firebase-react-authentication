@@ -11,6 +11,7 @@ import LoggedInRoute from "./routes/LoggedInRoute";
 import { DashboardRoutes } from "../views/Dashboard";
 import { Home } from "../views/Home/components";
 import Navbar from "../components/Navbar/navbar";
+import Toasts from "../components/Toast/toast";
 import { ForgotPassword } from "../views/ForgotPassword/components";
 
 const ApplicationRoutes = () => {
@@ -26,6 +27,7 @@ const ApplicationRoutes = () => {
         {/* <Redirect to="/auth" from="/" /> */}
         {/* <Route path="/" component={AuthRoutes} /> */}
       </Switch>
+      <Toasts />
     </Router>
   );
 };
