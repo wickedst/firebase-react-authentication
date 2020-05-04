@@ -16,7 +16,10 @@ const MyField = (props: any) => {
           isValid={meta.touched && !meta.error && meta.value}
           isInvalid={meta.value && meta.error}
         />
-        <Form.File.Label data-browse="Browse">
+        <Form.File.Label
+          data-browse="Browse"
+          style={{ whiteSpace: "nowrap", overflow: "hidden" }}
+        >
           {meta.value ? meta.value : props.label}
         </Form.File.Label>
         {props.useValidFeedback ? (
