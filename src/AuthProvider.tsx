@@ -2,19 +2,15 @@ import React, { useEffect, useState } from "react";
 import firebase from "./firebase";
 import "firebase/firestore";
 
-interface Toast {
-  message: string;
-  variant: string;
-}
-
 type ContextProps = {
   user: firebase.User | null;
   userProfile: firebase.firestore.DocumentData | null;
   authenticated: boolean;
   setUser: any;
+  setUserProfile: any;
   loadingAuthState: boolean;
   toasts: { message: string; variant: string }[];
-  setToasts: any;
+  addToasts: any;
 };
 
 export const AuthContext = React.createContext<Partial<ContextProps>>({});
@@ -22,10 +18,12 @@ export const AuthContext = React.createContext<Partial<ContextProps>>({});
 export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState(null as firebase.User | null);
   const [userProfile, setUserProfile] = useState(
-    null as firebase.firestore.DocumentData | null
+    {} as firebase.firestore.DocumentData | null
   );
   const [loadingAuthState, setLoadingAuthState] = useState(true);
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toasts, addToasts] = useState<{ message: string; variant: string }[]>(
+    []
+  );
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user: any) => {
@@ -60,12 +58,13 @@ export const AuthProvider = ({ children }: any) => {
     <AuthContext.Provider
       value={{
         user,
-        userProfile,
-        authenticated: user !== null,
         setUser,
+        authenticated: user !== null,
+        userProfile,
+        setUserProfile,
         loadingAuthState,
         toasts,
-        setToasts,
+        addToasts,
       }}
     >
       {children}
