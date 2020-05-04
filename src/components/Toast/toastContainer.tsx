@@ -9,7 +9,20 @@ const Toasts = () => {
     toasts.map((toast: { variant: string; message: string }, index: number) => {
       return <Toast content={toast} key={index} />;
     });
-  return <>{ftoasts}</>;
+  return (
+    <div
+      aria-live="polite"
+      aria-atomic="true"
+      style={{
+        position: "absolute",
+        minHeight: "100px",
+        width: "100%",
+        bottom: 0,
+      }}
+    >
+      {ftoasts}
+    </div>
+  );
 };
 
 export default Toasts;

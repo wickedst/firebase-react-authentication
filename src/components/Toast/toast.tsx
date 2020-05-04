@@ -11,34 +11,23 @@ const MyToast = (props: any) => {
   }, [props]);
 
   return (
-    <div
-      aria-live="polite"
-      aria-atomic="true"
+    <Toast
+      onClose={() => setShow(false)}
+      show={show}
+      delay={4000}
+      autohide
+      animation={true}
+      className={`bg-${props.content.variant} text-center text-white border-0`}
       style={{
         position: "absolute",
-        minHeight: "100px",
-        width: "100%",
-        bottom: 0,
+        top: 0,
+        right: 0,
+        left: 0,
+        margin: "auto",
       }}
     >
-      <Toast
-        onClose={() => setShow(false)}
-        show={show}
-        delay={4000}
-        autohide
-        animation={true}
-        className={`bg-${props.content.variant} text-center text-white`}
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          left: 0,
-          margin: "auto",
-        }}
-      >
-        <Toast.Body>{props.content.message}</Toast.Body>
-      </Toast>
-    </div>
+      <Toast.Body>{props.content.message}</Toast.Body>
+    </Toast>
   );
 };
 

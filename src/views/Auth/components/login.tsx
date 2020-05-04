@@ -19,7 +19,7 @@ const schema = yup.object({
 
 const Login = () => {
   const authContext = useContext(AuthContext);
-  const { loadingAuthState, setToasts } = useContext(AuthContext);
+  const { loadingAuthState, addToasts } = useContext(AuthContext);
   const history = useHistory();
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -90,9 +90,9 @@ const Login = () => {
       .signInWithEmailAndPassword(data.email, data.password)
       .then((res) => {
         setIsSubmitting(false);
-        authContext.setToasts((prevToasts: any) => [
+        authContext.addToasts((prevToasts: any) => [
           ...prevToasts,
-          { variant: "success", message: "Logged in" },
+          { variant: "success", message: "Login successful" },
         ]);
         authContext.setUser(res);
         console.log(res, "res");

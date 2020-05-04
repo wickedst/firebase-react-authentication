@@ -7,7 +7,7 @@ import { AuthContext } from "../../AuthProvider";
 import { useHistory, Link } from "react-router-dom";
 
 const MyNavbar = () => {
-  const { loadingAuthState, user, userProfile, setToasts } = useContext(
+  const { loadingAuthState, user, userProfile, addToasts } = useContext(
     AuthContext
   );
   const history = useHistory();
@@ -18,7 +18,7 @@ const MyNavbar = () => {
       .signOut()
       .then(() => {
         history.push("/");
-        setToasts((prevToasts: any) => [
+        addToasts((prevToasts: any) => [
           ...prevToasts,
           { variant: "info", message: "Logged out" },
         ]);
@@ -27,7 +27,7 @@ const MyNavbar = () => {
 
   const NavLoggedIn = () =>
     userProfile ? (
-      <Nav>
+      <>
         <NavDropdown
           alignRight
           title={userProfile.username}
@@ -39,39 +39,27 @@ const MyNavbar = () => {
           <NavDropdown.Divider />
           <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
         </NavDropdown>
-      </Nav>
+      </>
     ) : null;
 
   const NavLoggedOut = () =>
     !loadingAuthState ? (
-      <Nav>
+      <>
         <Nav.Link to="/auth/login" as={Link}>
           Log in
         </Nav.Link>
         <Nav.Link to="/auth/signup" as={Link}>
           Sign Up
         </Nav.Link>
-      </Nav>
+      </>
     ) : null;
 
   return (
-    <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+    <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark">
       <Navbar.Brand to="/" as={Link}>
         Firebase React Starter
       </Navbar.Brand>
-      <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-      <Navbar.Collapse id="responsive-navbar-nav">
-        <Nav className="mr-auto">
-          <NavDropdown title="Dropdown" id="collasible-nav-dropdown">
-            <NavDropdown.Item>Action</NavDropdown.Item>
-            <NavDropdown.Item>Another action</NavDropdown.Item>
-            <NavDropdown.Item>Something</NavDropdown.Item>
-            <NavDropdown.Divider />
-            <NavDropdown.Item>Separated link</NavDropdown.Item>
-          </NavDropdown>
-        </Nav>
-        {user ? <NavLoggedIn /> : <NavLoggedOut />}
-      </Navbar.Collapse>
+      <Nav className="ml-auto">{user ? <NavLoggedIn /> : <NavLoggedOut />}</Nav>
     </Navbar>
   );
 };

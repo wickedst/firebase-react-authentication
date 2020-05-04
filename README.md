@@ -1,6 +1,6 @@
 # Firebase React Typescript Starter
 
-A boilerplate to help speed up development of Firebase web apps. This is intended to provide a solid foundation for rapid prototyping - to save time and be a realistic basis for production projects built on Firebase.
+A boilerplate to help speed up development of Firebase web apps. This is intended to provide a solid foundation for rapid prototyping - to save time and be a realistic platform for production projects built on Firebase.
 
 Uses React Hooks and the React Context API (no Redux).
 
@@ -13,7 +13,7 @@ Uses React Hooks and the React Context API (no Redux).
 - Forms with Formik and yup
 - User registration with unique usernames, email and password (Firebase authentication)
 - Login, Private route and Logged in / Logged out route via React Router
-- UI basics like live form validation, user navbar dropdown, alerts and toasts for error / success
+- UI basics like live form validation, user navbar dropdown, loading indicators (spinners), alerts and toasts for error / success
 
 ## To do
 
