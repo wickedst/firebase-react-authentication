@@ -10,18 +10,18 @@ const Toasts = () => {
       return <Toast content={toast} key={index} />;
     });
   return (
-    <div
-      aria-live="polite"
-      aria-atomic="true"
-      style={{
-        position: "absolute",
-        minHeight: "100px",
-        width: "100%",
-        bottom: 0,
-      }}
-    >
-      {ftoasts}
-    </div>
+    // <div
+    //   aria-live="polite"
+    //   aria-atomic="true"
+    //   style={{
+    //     position: "absolute",
+    //     minHeight: "100px",
+    //     width: "100%",
+    //     bottom: 0,
+    //   }}
+    // >
+    <>{ftoasts}</>
+    // </div>
   );
 };
 

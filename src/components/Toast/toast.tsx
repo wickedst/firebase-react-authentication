@@ -19,8 +19,9 @@ const MyToast = (props: any) => {
       animation={true}
       className={`bg-${props.content.variant} text-center text-white border-0`}
       style={{
-        position: "absolute",
-        top: 0,
+        position: "fixed",
+        zIndex: 2009,
+        bottom: "5%",
         right: 0,
         left: 0,
         margin: "auto",
