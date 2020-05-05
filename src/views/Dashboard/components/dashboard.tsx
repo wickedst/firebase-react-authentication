@@ -111,6 +111,7 @@ const UploadProfilePicture = () => {
 
 const Dashboard = () => {
   const { userProfile } = useContext(AuthContext);
+  const [showUploadForm, setShowUploadForm] = useState<boolean>(false);
   return (
     <div className="container text-center py-4">
       <h1>Dashboard</h1>
@@ -118,15 +119,23 @@ const Dashboard = () => {
       {userProfile ? (
         <div>
           Hello {userProfile.username}
-          {userProfile.profilePicture ? (
+          {userProfile.profilePicture && (
             <div>
               <img
                 src={userProfile.profilePicture}
                 alt={userProfile.username}
+                className="d-block w-100"
               />
+              <button
+                className="btn btn-link-danger btn-sm"
+                onClick={() => {
+                  setShowUploadForm(true);
+                }}
+              >
+                Change profile pic
+              </button>
+              {showUploadForm && <UploadProfilePicture />}
             </div>
-          ) : (
-            <UploadProfilePicture />
           )}
         </div>
       ) : (
