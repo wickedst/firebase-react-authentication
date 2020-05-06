@@ -19,7 +19,7 @@ const schema = yup.object({
 
 const Login = () => {
   const authContext = useContext(AuthContext);
-  const { loadingAuthState, addToasts } = useContext(AuthContext);
+  const { loadingAuthState } = useContext(AuthContext);
   const history = useHistory();
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -41,46 +41,11 @@ const Login = () => {
         } else if (!result || !result.user || !firebase.auth().currentUser) {
           return;
         }
-
-        // if logged in redirect to dashboard
-        return setUserProfile().then(() => {
-          history.push("/dashboard");
-        });
       })
       .catch((error) => {
         console.log(error, "error");
       });
   });
-
-  const setUserProfile = async () => {
-    if (await isUserExists()) {
-      return;
-    }
-
-    const currentUser = firebase.auth().currentUser!;
-    db.collection("Users")
-      .doc(currentUser.uid)
-      .set({
-        username: currentUser.displayName,
-      })
-      .then(() => {
-        console.log("Saved");
-        return;
-      })
-      .catch((error) => {
-        // handleError
-        console.log(error.message);
-      });
-  };
-
-  const isUserExists = async () => {
-    // what if user does not exist? Send alert
-    const doc = await db
-      .collection("users")
-      .doc(firebase.auth().currentUser!.uid)
-      .get();
-    return doc.exists;
-  };
 
   const handleLogin = (data: any) => {
     setIsSubmitting(true);

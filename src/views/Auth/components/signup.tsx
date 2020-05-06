@@ -37,7 +37,7 @@ const SignUp = () => {
             .createUserWithEmailAndPassword(data.email, data.password)
             .then((userCredential: firebase.auth.UserCredential) => {
               // prettier-ignore
-              userDoc.set({ email: data.email, username: data.username, uid: userCredential.user!.uid, });
+              userDoc.set({ slug: usernameSlug, email: data.email, username: data.username, uid: userCredential.user!.uid, });
             })
             // if doc/username exists
             .catch((error: any) => {

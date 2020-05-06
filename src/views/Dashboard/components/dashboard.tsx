@@ -12,7 +12,7 @@ import * as yup from "yup";
 
 import uploadFile from "../../../utils/uploadFileToStorage";
 import firebaseUpdateUser from "../../../utils/firebaseUpdateUser";
-import firebaseGetAuthId from "../../../utils/firebaseGetAuthId";
+import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
 
 const schema = yup.object({
   profilePicture: yup
@@ -31,7 +31,7 @@ const UploadProfilePicture = () => {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { userProfile, setUserProfile, addToasts } = useContext(AuthContext);
 
-  const authId = firebaseGetAuthId();
+  const auth = firebaseGetAuth();
 
   const imageUpload = (image: any) => {
     setIsSubmitting(true);
@@ -40,11 +40,11 @@ const UploadProfilePicture = () => {
       setUploadProgress(res);
     };
 
-    userProfile
+    auth
       ? // change to get auth
-        uploadFile(authId, image, progressCallback)
+        uploadFile(auth.uid, image, progressCallback)
           .then((res) => {
-            firebaseUpdateUser({ profilePicture: res }, authId);
+            firebaseUpdateUser({ profilePicture: res }, auth.uid);
             // prettier-ignore
             setUserProfile( (profile: any) => (profile = { ...profile, ...{ profilePicture: res } }));
           })

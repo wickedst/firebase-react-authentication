@@ -1,8 +1,7 @@
 import firebase from "firebase";
 
-function firebaseGetAuthId(): string {
-  //@ts-ignore
-  return firebase.auth().currentUser.uid;
+function firebaseGetAuth(): firebase.User | null {
+  return firebase.auth().currentUser;
 }
 
-export default firebaseGetAuthId;
+export default firebaseGetAuth;

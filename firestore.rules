@@ -8,4 +8,6 @@ service cloud.firestore {
       allow create: if request.auth.uid != null;
     }
   }
+
+  // walls -> messages, only if submitted user: uid match request.auth.uid
 }

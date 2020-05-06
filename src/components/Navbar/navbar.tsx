@@ -30,7 +30,7 @@ const MyNavbar = () => {
       <>
         <NavDropdown
           alignRight
-          title={userProfile ? userProfile.username : `My Account`}
+          title={userProfile.username ? userProfile.username : ``}
           id="collasible-nav-dropdown"
         >
           <NavDropdown.Item to="/dashboard" as={Link}>

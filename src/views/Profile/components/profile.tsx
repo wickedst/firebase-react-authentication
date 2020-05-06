@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import firebaseGetUser from "../../../utils/firebaseGetUser";
 
+import Wall from "./wall";
+
 const Profile = () => {
   const params: { slug: string } = useParams();
   const [profile, setProfile] = useState<any>(null);
@@ -10,7 +12,6 @@ const Profile = () => {
   useEffect(() => {
     firebaseGetUser(params.slug)
       .then((res) => {
-        console.log(res);
         setProfile(res);
         setLoading(false);
       })
@@ -40,6 +41,7 @@ const Profile = () => {
           />
         )}
         <h1>{profile.username} Profile</h1>
+        <Wall profile={profile} />
       </div>
     );
   };
