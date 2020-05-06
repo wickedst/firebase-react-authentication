@@ -124,7 +124,7 @@ const Dashboard = () => {
               <img
                 src={userProfile.profilePicture}
                 alt={userProfile.username}
-                className="d-block w-100"
+                className="d-block w-50 mx-auto my-3"
               />
               <button
                 className="btn btn-link-danger btn-sm"

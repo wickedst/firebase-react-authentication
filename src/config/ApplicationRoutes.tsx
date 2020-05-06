@@ -10,6 +10,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import LoggedInRoute from "./routes/LoggedInRoute";
 import { DashboardRoutes } from "../views/Dashboard";
 import { Home } from "../views/Home/components";
+import { Profile } from "../views/Profile/components";
 import Navbar from "../components/Navbar/navbar";
 import Toasts from "../components/Toast/toastContainer";
 import { ForgotPassword } from "../views/ForgotPassword/components";
@@ -20,6 +21,7 @@ const ApplicationRoutes = () => {
       <Navbar />
       <Switch>
         <Route exact path="/" component={Home} />
+        <Route exact path="/profile/:slug" component={Profile} />
         <LoggedInRoute path="/auth" component={AuthRoutes} />
         <PrivateRoute exact path="/dashboard" component={DashboardRoutes} />
         <Route path="/auth" component={AuthRoutes} />
