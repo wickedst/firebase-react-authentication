@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import firebase from "firebase";
 import FormWallMessage from "../../../components/Forms/FormWallMessage";
 import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
-import { timeAgo } from "../../../utils/general";
+import { formatDistanceToNowStrict } from "date-fns";
+import sortBy from "lodash.sortby";
 
 export interface WallMessage {
   timestamp: number;
@@ -51,12 +52,22 @@ const Wall = (props: any) => {
   };
 
   const WallMessages = () => {
+    const sortedMessages = sortBy(wallMessages, "timestamp").reverse();
+
     return (
       <div className="text-left py-3">
-        {wallMessages.map((message, index) => {
+        {sortedMessages.map((message: any, index: number) => {
           return (
             <div key={index} className="mb-1">
-              <div className="small text-muted">{message.timestamp}</div>
+              <div className="small">
+                {message.user.username}
+                {" - "}
+                <span className="text-muted">
+                  {formatDistanceToNowStrict(message.timestamp, {
+                    addSuffix: true,
+                  })}
+                </span>
+              </div>
               {message.message}
             </div>
           );
