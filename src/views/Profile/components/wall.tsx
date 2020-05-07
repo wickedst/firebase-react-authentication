@@ -12,7 +12,7 @@ export interface WallMessage {
     username: string;
     slug: string;
     uid: string;
-    profilePicture: string;
+    profilePicture: string | null;
   };
 }
 

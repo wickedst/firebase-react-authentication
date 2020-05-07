@@ -37,7 +37,9 @@ const FormWallMessage: React.FC<FormWallMessageProps> = (props) => {
               uid,
               username: userProfile.username,
               slug: userProfile.slug,
-              profilePicture: userProfile.profilePicture,
+              profilePicture: userProfile.profilePicture
+                ? userProfile.profilePicture
+                : null,
             },
           };
           props.onAddMessage(message);
