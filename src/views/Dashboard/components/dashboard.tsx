@@ -119,6 +119,7 @@ const Dashboard = () => {
       {userProfile ? (
         <div>
           Hello {userProfile.username}
+          <UploadProfilePicture />
           {userProfile.profilePicture && (
             <div>
               <img
@@ -134,7 +135,6 @@ const Dashboard = () => {
               >
                 Change profile pic
               </button>
-              {showUploadForm && <UploadProfilePicture />}
             </div>
           )}
         </div>

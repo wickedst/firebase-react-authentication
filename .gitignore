@@ -27,3 +27,4 @@ yarn-error.log*
 functions/firebase-debug.log
 .env
 .firebase
+yarn.lock
