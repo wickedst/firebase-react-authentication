@@ -1,3 +1,4 @@
+rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     // match /{allPaths=**} {
@@ -16,6 +17,7 @@ service firebase.storage {
      // 4) Uploaded content type matches existing content type (if it exists)
      // 5) File name (stored in imageId wildcard variable) is less than 100 characters
      match /{userId}/{imageId} {
+       allow read; 
        allow write: if request.auth.uid == userId
                     && request.resource.size <= 1 * 1024 * 1024
                     && request.resource.contentType.matches('image/.*')
