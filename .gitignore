@@ -28,3 +28,4 @@ functions/firebase-debug.log
 .env
 .firebase
 yarn.lock
+firestore-debug.log

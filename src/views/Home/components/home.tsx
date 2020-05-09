@@ -2,31 +2,36 @@ import React, { useEffect, useContext } from "react";
 import firebase from "firebase";
 import { AuthContext } from "../../../AuthProvider";
 
-function displayImage(imageRef: firebase.storage.Reference): void {
-  imageRef
-    .getDownloadURL()
-    .then(function (url) {
-      console.log(url);
-      // TODO: Display the image on the UI
-    })
-    .catch(function (error) {
-      // Handle any errors
-    });
-}
 const Home = () => {
   const { userProfile } = useContext(AuthContext);
 
   useEffect(() => {
     if (userProfile) {
-      const storageRef = firebase.storage().ref(`users/${userProfile.uid}/`);
+      let thumbs = {} as any;
+      const storageRef = firebase
+        .storage()
+        .ref(`users/${userProfile.uid}/profilePicture/`);
 
       storageRef
         .listAll()
         .then(function (result) {
+          const sizes = [64, 128, 256];
+
           result.items.forEach(function (imageRef) {
-            console.log("imageRef ", imageRef);
-            displayImage(imageRef);
+            imageRef.getDownloadURL().then(function (url: string) {
+              sizes.forEach((size) => {
+                if (url.includes(`thumb%40${size}`)) {
+                  console.log(url);
+                  thumbs[size] = url;
+                }
+              });
+            });
           });
+          console.log(thumbs);
+        })
+
+        .then(() => {
+          console.log(thumbs);
         })
         .catch(function (error) {
           console.log(error);

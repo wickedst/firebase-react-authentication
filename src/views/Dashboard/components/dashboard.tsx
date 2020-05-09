@@ -42,7 +42,7 @@ const UploadProfilePicture = () => {
 
     auth
       ? // change to get auth
-        uploadFile(auth.uid, image, progressCallback)
+        uploadFile(`${auth.uid}/profilePicture/`, image, progressCallback)
           .then((res) => {
             firebaseUpdateUser({ profilePicture: res }, auth.uid);
             // prettier-ignore

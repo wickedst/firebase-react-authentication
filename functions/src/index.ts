@@ -3,16 +3,12 @@ import { tmpdir } from "os";
 import * as sharp from "sharp";
 import * as fs from "fs-extra";
 import { dirname, join } from "path";
-
 import * as storage from "@google-cloud/storage";
+
 const admin = require("firebase-admin");
 admin.initializeApp();
 
 const usersRef = admin.firestore().collection("users");
-
-export const helloWorld = functions.https.onRequest((request, response) => {
-  response.send("Hello from Firebase!");
-});
 
 export const usernameIsTaken = functions.https.onCall((data: any) => {
   const username = data.username;
@@ -29,36 +25,12 @@ export const usernameIsTaken = functions.https.onCall((data: any) => {
     });
 });
 
-// is this secure?
-export const setUser = functions.https.onCall((data: any) => {
-  const { email, username, uid } = data;
-
-  usersRef
-    .doc(uid)
-    .set({
-      email: email,
-      username: username,
-    })
-    .then((res: any) => res)
-    .catch((error: any) => error);
-});
-
-// is this secure?
-export const updateUser = functions.https.onCall((data: any) => {
-  const { payload, uid } = data;
-
-  usersRef
-    .doc(uid)
-    .update({
-      ...payload,
-    })
-    .then((res: any) => res)
-    .catch((error: any) => error);
-});
+const sizes = [64, 128, 256];
 
 // Thumbnail generator
 const gcs = new storage.Storage();
-export const generateThumbs = functions.storage
+
+export const generateThumbs2 = functions.storage
   .object()
   .onFinalize(async (object) => {
     const bucket = gcs.bucket(object.bucket);
@@ -87,7 +59,6 @@ export const generateThumbs = functions.storage
       });
 
       // 3. Resize the images and define an array of upload promises
-      const sizes = [64, 128, 256];
 
       const uploadPromises = sizes.map(async (size) => {
         const thumbName = `thumb@${size}_${fileName}`;
@@ -104,6 +75,50 @@ export const generateThumbs = functions.storage
 
       // 4. Run the upload operations
       await Promise.all(uploadPromises);
+
+      // 6. If this upload is a profilePicutre, attach the thumbnails to the users' document
+      if (bucketDir.includes("profilePicture")) {
+        const userUid = bucketDir.split("/")[1];
+
+        const [buckets] = await gcs.getBuckets();
+        // Just get the first / only bucket of the project. This can probably be improved
+        const [files] = await gcs.bucket(buckets[0].name).getFiles({
+          prefix: bucketDir,
+        });
+
+        let thumbsObj = {} as any;
+
+        files.forEach((file) => {
+          file
+            .getSignedUrl({
+              action: "read",
+              expires: "03-09-2491",
+            })
+            .then((signedUrl) => {
+              console.log("signedUrl: ", signedUrl[0]);
+              // For each of our sizes, loop through
+              sizes.forEach((size) => {
+                if (signedUrl[0].includes(`thumb%40${size}`)) {
+                  thumbsObj[size] = signedUrl[0];
+                }
+              });
+            })
+            .then(() => {
+              // setUser thumbs
+              usersRef
+                .doc(userUid)
+                .update({
+                  thumbs: thumbsObj,
+                })
+                .then((res: any) => {
+                  console.log(res);
+                })
+                .catch((error: any) => {
+                  console.log(error);
+                });
+            });
+        });
+      }
 
       // 5. Cleanup remove the tmp/thumbs from the filesystem
       return fs.remove(workingDir);
