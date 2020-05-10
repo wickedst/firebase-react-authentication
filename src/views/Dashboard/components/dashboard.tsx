@@ -13,9 +13,10 @@ import * as yup from "yup";
 import uploadFile from "../../../utils/uploadFileToStorage";
 import firebaseUpdateUser from "../../../utils/firebaseUpdateUser";
 import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
+import { profile } from "console";
 
 const schema = yup.object({
-  profilePicture: yup
+  avatar: yup
     .mixed()
     .required("A file is required")
     .test("fileFormat", "Please select a valid image type", (value) => {
@@ -26,10 +27,10 @@ const schema = yup.object({
     }),
 });
 
-const UploadProfilePicture = () => {
+const Uploadavatar = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const { userProfile, setUserProfile, addToasts } = useContext(AuthContext);
+  const { setUserProfile, addToasts } = useContext(AuthContext);
 
   const auth = firebaseGetAuth();
 
@@ -42,11 +43,12 @@ const UploadProfilePicture = () => {
 
     auth
       ? // change to get auth
-        uploadFile(`${auth.uid}/profilePicture/`, image, progressCallback)
+        uploadFile(`users/${auth.uid}/avatar/`, image, progressCallback)
           .then((res) => {
-            firebaseUpdateUser({ profilePicture: res }, auth.uid);
+            //@ts-ignore
+            firebaseUpdateUser({ avatarFull: res }, auth.uid);
             // prettier-ignore
-            setUserProfile( (profile: any) => (profile = { ...profile, ...{ profilePicture: res } }));
+            setUserProfile( (profile: any) => (profile = { ...profile, ...{ avatarFull: res } }));
           })
           .then(() => {
             setIsSubmitting(false);
@@ -56,6 +58,7 @@ const UploadProfilePicture = () => {
           })
           .catch((err: any) => {
             // errorHandler
+            console.log(err);
             setIsSubmitting(false);
             setUploadProgress(0);
             // prettier-ignore
@@ -68,23 +71,20 @@ const UploadProfilePicture = () => {
     <Formik
       validationSchema={schema}
       initialValues={{
-        profilePicture: "",
+        avatar: "",
       }}
       onSubmit={(data) => {
-        imageUpload(data.profilePicture);
+        imageUpload(data.avatar);
       }}
     >
-      {(profilePicture) => (
+      {(avatar) => (
         <FormikForm className="py-3 offset-md-3 col-md-6">
-          {/* <pre>{profilePicture.values.profilePicture}</pre> */}
+          {/* <pre>{avatar.values.avatar}</pre> */}
           <Form.Row>
             <Form.Group as={Col} sm>
-              <FormFieldFile
-                name="profilePicture"
-                label="Upload a profile picture"
-              />
+              <FormFieldFile name="avatar" label="Upload a profile picture" />
             </Form.Group>
-            {profilePicture.values.profilePicture && (
+            {avatar.values.avatar && (
               <Form.Group as={Col} sm={2}>
                 <button
                   disabled={isSubmitting}
@@ -118,25 +118,22 @@ const Dashboard = () => {
 
       {userProfile ? (
         <div>
-          Hello {userProfile.username}
-          <UploadProfilePicture />
-          {userProfile.profilePicture && (
+          {userProfile.avatar && (
             <div>
               <img
-                src={userProfile.profilePicture}
+                src={
+                  userProfile.avatarThumbs
+                    ? userProfile.avatarThumbs["256"]
+                    : userProfile.avatarFull
+                }
                 alt={userProfile.username}
-                className="d-block w-50 mx-auto my-3"
+                className="d-block mx-auto my-3"
+                style={{ maxWidth: 128 }}
               />
-              <button
-                className="btn btn-link-danger btn-sm"
-                onClick={() => {
-                  setShowUploadForm(true);
-                }}
-              >
-                Change profile pic
-              </button>
             </div>
           )}
+          Hello {userProfile.username}
+          <Uploadavatar />
         </div>
       ) : (
         <Spinner animation="grow" variant="primary" />

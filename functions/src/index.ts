@@ -77,7 +77,7 @@ export const generateThumbs2 = functions.storage
       await Promise.all(uploadPromises);
 
       // 6. If this upload is a profilePicutre, attach the thumbnails to the users' document
-      if (bucketDir.includes("profilePicture")) {
+      if (bucketDir.includes("avatar")) {
         const userUid = bucketDir.split("/")[1];
 
         const [buckets] = await gcs.getBuckets();
@@ -108,7 +108,7 @@ export const generateThumbs2 = functions.storage
               usersRef
                 .doc(userUid)
                 .update({
-                  thumbs: thumbsObj,
+                  avatarThumbs: thumbsObj,
                 })
                 .then((res: any) => {
                   console.log(res);

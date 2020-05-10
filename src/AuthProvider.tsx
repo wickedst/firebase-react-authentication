@@ -36,16 +36,14 @@ export const AuthProvider = ({ children }: any) => {
       if (user !== null) {
         const db = firebase.firestore();
         db.collection("users")
-          .where("uid", "==", firebase.auth().currentUser!.uid)
+          .doc(firebase.auth().currentUser!.uid)
           .get()
-          .then((snapshot) => {
-            snapshot.forEach((doc) => {
-              const user = doc.data();
-              if (user) {
-                console.log("Set user profile: ", user);
-                setUserProfile(user);
-              }
-            });
+          .then((res) => {
+            const user = res.data();
+            if (user) {
+              console.log("Set user profile: ", user);
+              setUserProfile(user);
+            }
           });
       } else {
         console.log("Emptied user profile");

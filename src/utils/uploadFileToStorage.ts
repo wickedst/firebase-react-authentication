@@ -7,9 +7,7 @@ export default function uploadFile(
 ) {
   return new Promise((resolve, reject) => {
     var storageRef = firebase.storage().ref();
-    var uploadTask = storageRef
-      .child(`users/${storagePath}/${file.name}`)
-      .put(file);
+    var uploadTask = storageRef.child(`${storagePath}/${file.name}`).put(file);
 
     console.log("Uploading?", file.name);
 

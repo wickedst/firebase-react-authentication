@@ -33,12 +33,8 @@ const Profile = () => {
   const ProfileContent = () => {
     return (
       <div>
-        {profile.profilePicture && (
-          <img
-            src={profile.profilePicture}
-            className="w-50 mb-3"
-            alt="profile"
-          />
+        {profile.avatar && (
+          <img src={profile.avatar} className="w-50 mb-3" alt="profile" />
         )}
         <h1>{profile.username} Profile</h1>
         <Wall profile={profile} />

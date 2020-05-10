@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { useHistory, Link } from "react-router-dom";
 import firebase from "../../../firebase";
 import "firebase/auth";
 import "firebase/firestore";
 import "firebase/functions";
+import { AuthContext } from "../../../AuthProvider";
 
 import { Formik } from "formik";
 import { Form as FormikForm } from "formik";
@@ -14,6 +15,9 @@ import schema from "../../../schemas/signup.schema";
 import slugify from "slugify";
 
 const SignUp = () => {
+  const authContext = useContext(AuthContext);
+  const history = useHistory();
+
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // prettier-ignore
   const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
@@ -27,37 +31,29 @@ const SignUp = () => {
     // prettier-ignore
     const usernameSlug = slugify(data.username, { remove: /[$*+~.,()'"!\-:@]/g, lower: true, });
 
-    let userDoc = firebase.firestore().collection("users").doc(usernameSlug);
-    userDoc
-      .get()
-      .then((doc) => {
-        if (!doc.exists) {
-          firebase
-            .auth()
-            .createUserWithEmailAndPassword(data.email, data.password)
-            .then((userCredential: firebase.auth.UserCredential) => {
-              // prettier-ignore
-              userDoc.set({ slug: usernameSlug, email: data.email, username: data.username, uid: userCredential.user!.uid, });
-            })
-            // if doc/username exists
-            .catch((error: any) => {
-              setIsSubmitting(false);
-              // prettier-ignore
-              setAlert({ show: true, type: "danger", messages: [error.message] });
-            });
-        } else {
-          // prettier-ignore
-          setAlert({ show: true, type: "danger", messages: ["Username taken"] });
-        }
-      })
-      .then(() => {
-        // Will automatically push to dashboard
-        setIsSubmitting(false);
-      })
-      .catch((error: any) => {
-        setIsSubmitting(false);
-        setAlert({ show: true, type: "danger", messages: [error.message] });
-        console.log(error.message);
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(data.email, data.password)
+      .then((userCredential: firebase.auth.UserCredential) => {
+        authContext.setUser(userCredential);
+        // check if user exists
+        const db = firebase.firestore();
+        db.collection("users")
+          .doc(userCredential.user!.uid)
+          .set({
+            email: data.email,
+            username: data.username,
+            slug: usernameSlug,
+          })
+          .then(() => {
+            setIsSubmitting(false);
+            history.push("/dashboard");
+          })
+          .catch((error) => {
+            setIsSubmitting(false);
+            setAlert({ show: true, type: "danger", messages: [error.message] });
+            console.log(error.message);
+          });
       });
   };
   return (

@@ -10,7 +10,7 @@ const Home = () => {
       let thumbs = {} as any;
       const storageRef = firebase
         .storage()
-        .ref(`users/${userProfile.uid}/profilePicture/`);
+        .ref(`users/${userProfile.uid}/avatar/`);
 
       storageRef
         .listAll()
