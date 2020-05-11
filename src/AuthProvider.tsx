@@ -43,7 +43,13 @@ export const AuthProvider = ({ children }: any) => {
             if (user) {
               console.log("Set user profile: ", user);
               setUserProfile(user);
+            } else {
+              setUserProfile(null);
             }
+          })
+          .catch((error) => {
+            console.log(error);
+            setUserProfile(null);
           });
       } else {
         console.log("Emptied user profile");

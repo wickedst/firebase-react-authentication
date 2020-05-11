@@ -1,52 +1,81 @@
-import React, { useState, useContext } from "react";
-import { useHistory, Link } from "react-router-dom";
+import React, { useState } from "react";
 import firebase from "../../../firebase";
 import "firebase/auth";
 import "firebase/firestore";
-import { AuthContext } from "../../../AuthProvider";
+import "firebase/functions";
 
 import { Formik } from "formik";
 import { Form as FormikForm } from "formik";
 import FormField from "../../../components/FormFields/FormField";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
-import schema from "../../../schemas/signup.schema";
+import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
+import * as yup from "yup";
+import { useHistory } from "react-router-dom";
 
-const SignUp = () => {
-  const authContext = useContext(AuthContext);
-  const history = useHistory();
+const schema = yup.object({
+  username: yup
+    .string()
+    .required()
+    .min(3)
+    .max(15)
+    .matches(
+      /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/,
+      "Can not contain spaces or special characters"
+    ),
+});
 
+const CreateProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // prettier-ignore
   const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
+  const history = useHistory();
 
-  const handleSignup = (data: { email: string; password: string }) => {
+  const handleCreateProfile = async (data: { username: string }) => {
     setIsSubmitting(true);
     // prettier-ignore
+    const auth = firebaseGetAuth();
 
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(data.email, data.password)
-      .then((userCredential: firebase.auth.UserCredential) => {
-        authContext.setUser(userCredential);
+    const db = firebase.firestore();
+    // create username entry in usernames collection
+    // username / slug will be added to users collection document via cloud function
+    const uid = auth ? auth.uid : "";
+    await db
+      .collection("usernames")
+      .doc(auth?.uid)
+      .set({
+        username: data.username,
       })
+      .then(() => {
+        db.collection("usernames")
+          .doc("list")
+          .update({
+            [uid]: data.username,
+          });
+        // push createdProfile: true to userProfile context
+        history.push("dashboard");
+        setIsSubmitting(false);
+      })
+      // if username can't be created, can not advance
       .catch((error) => {
         setIsSubmitting(false);
         setAlert({ show: true, type: "danger", messages: [error.message] });
         console.log(error.message);
-      })
+      });
   };
   return (
-    <div className="container py-4 text-center">
-      <h1>Sign up</h1>
+    <>
+      <h1>Create your profile</h1>
+      <p>
+        You've registered using your email, [email]. Now finish your profile
+      </p>
       <Formik
         validationSchema={schema}
         initialValues={{
-          email: "",
-          password: "",
+          username: "",
         }}
         onSubmit={(data) => {
-          handleSignup(data);
+          handleCreateProfile(data);
         }}
       >
         {() => (
@@ -60,17 +89,10 @@ const SignUp = () => {
             )}
             <Form.Group>
               <FormField
-                placeholder="Email Address"
-                name="email"
+                placeholder="Username"
+                name="username"
                 type="input"
-              />
-            </Form.Group>
-            <Form.Group>
-              <FormField
-                placeholder="Password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
+                autoComplete="username"
               />
             </Form.Group>
             {/* prettier-ignore */}
@@ -82,13 +104,11 @@ const SignUp = () => {
                 "Sign Up"
               )}
             </button>
-            {/* prettier-ignore */}
-            <p className="small mt-2">Already registered? <Link to="/auth/login">Log in</Link></p>
           </FormikForm>
         )}
       </Formik>
-    </div>
+    </>
   );
 };
 
-export default SignUp;
+export default CreateProfile;

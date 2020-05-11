@@ -17,17 +17,6 @@ import * as yup from "yup";
 // });
 
 const schema = yup.object({
-  username: yup
-    .string()
-    .required()
-    .min(3)
-    .max(15)
-    .matches(
-      /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/,
-      "Can not contain spaces or special characters"
-    ),
-  //@ts-ignore
-  // .usernameIsTaken(),
   email: yup.string().email().required(),
   password: yup
     .string()

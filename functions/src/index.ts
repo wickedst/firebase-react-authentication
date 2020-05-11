@@ -4,6 +4,7 @@ import * as sharp from "sharp";
 import * as fs from "fs-extra";
 import { dirname, join } from "path";
 import * as storage from "@google-cloud/storage";
+import slugify from "slugify";
 
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -25,12 +26,52 @@ export const usernameIsTaken = functions.https.onCall((data: any) => {
     });
 });
 
-const sizes = [64, 128, 256];
+// createNewUserDoc - create user document server side
+export const createNewUserDoc = functions.auth.user().onCreate(async (user) => {
+  console.log(`Creating document for user ${user.uid}`);
+  await usersRef.doc(user.uid).set({
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdProfile: false,
+    emailVerified: false,
+    likes: 0,
+  });
+});
+
+// uniqueUsername - Create username record in 'usernames' collection
+export const uniqueUsername = functions.firestore
+  .document("usernames/{document}")
+  .onCreate(async (sppDoc: any, context) => {
+    const docId = context.params.document; // this is how to get the document name
+    console.log(docId);
+    // console.log(usernameSlug);
+    const data = sppDoc.data();
+    console.log(data); // the user defined fields:values
+    const usernameSlug = slugify(data.username, {
+      remove: /[$*+~.,()'"!\-:@]/g,
+      lower: true,
+    });
+    // don't write if there's already a username
+    await usersRef
+      .doc(docId)
+      .get()
+      .then((doc: { data: () => any }) => {
+        const user = doc.data();
+        if (user.username && user.slug) {
+          console.log("Already have username / slug");
+          return;
+        }
+      });
+    // write username if no username
+    await usersRef.doc(docId).update({
+      username: data.username,
+      slug: usernameSlug,
+    });
+  });
 
 // Thumbnail generator
+const sizes = [64, 128, 256];
 const gcs = new storage.Storage();
-
-export const generateThumbs2 = functions.storage
+export const generateThumbs = functions.storage
   .object()
   .onFinalize(async (object) => {
     const bucket = gcs.bucket(object.bucket);
@@ -76,7 +117,7 @@ export const generateThumbs2 = functions.storage
       // 4. Run the upload operations
       await Promise.all(uploadPromises);
 
-      // 6. If this upload is a profilePicutre, attach the thumbnails to the users' document
+      // 5. If this upload is an avatar, attach the thumbnails to the users' document
       if (bucketDir.includes("avatar")) {
         const userUid = bucketDir.split("/")[1];
 
@@ -95,7 +136,7 @@ export const generateThumbs2 = functions.storage
               expires: "03-09-2491",
             })
             .then((signedUrl) => {
-              console.log("signedUrl: ", signedUrl[0]);
+              // console.log("signedUrl: ", signedUrl[0]);
               // For each of our sizes, loop through
               sizes.forEach((size) => {
                 if (signedUrl[0].includes(`thumb%40${size}`)) {
@@ -120,7 +161,7 @@ export const generateThumbs2 = functions.storage
         });
       }
 
-      // 5. Cleanup remove the tmp/thumbs from the filesystem
+      // 6. Cleanup remove the tmp/thumbs from the filesystem
       return fs.remove(workingDir);
     }
   });

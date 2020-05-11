@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import firebaseGetUser from "../../../utils/firebaseGetUser";
+import firebaseGetUserBySlug from "../../../utils/firebaseGetUserBySlug";
 
 import Wall from "./wall";
 
@@ -10,15 +10,16 @@ const Profile = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    firebaseGetUser(params.slug)
+    firebaseGetUserBySlug(params.slug)
       .then((res) => {
+        // console.log(res);
         setProfile(res);
         setLoading(false);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [params.slug]);
 
   const Main = () => {
     if (loading) {

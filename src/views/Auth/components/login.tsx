@@ -26,8 +26,6 @@ const Login = () => {
   // prettier-ignore
   const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
 
-  const db = firebase.firestore();
-
   useEffect(() => {
     // check if user is logged in
     firebase

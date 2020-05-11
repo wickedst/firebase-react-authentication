@@ -13,7 +13,7 @@ import * as yup from "yup";
 import uploadFile from "../../../utils/uploadFileToStorage";
 import firebaseUpdateUser from "../../../utils/firebaseUpdateUser";
 import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
-import { profile } from "console";
+import CreateProfile from "./createProfile";
 
 const schema = yup.object({
   avatar: yup
@@ -111,12 +111,12 @@ const Uploadavatar = () => {
 
 const Dashboard = () => {
   const { userProfile } = useContext(AuthContext);
-  const [showUploadForm, setShowUploadForm] = useState<boolean>(false);
+
   return (
     <div className="container text-center py-4">
-      <h1>Dashboard</h1>
-
-      {userProfile ? (
+      {!userProfile?.createdProfile ? (
+        <CreateProfile />
+      ) : (
         <div>
           {userProfile.avatar && (
             <div>
@@ -135,8 +135,6 @@ const Dashboard = () => {
           Hello {userProfile.username}
           <Uploadavatar />
         </div>
-      ) : (
-        <Spinner animation="grow" variant="primary" />
       )}
     </div>
   );
