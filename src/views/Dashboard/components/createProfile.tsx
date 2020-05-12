@@ -39,22 +39,23 @@ const CreateProfile = () => {
     const db = firebase.firestore();
     // create username entry in usernames collection
     // username / slug will be added to users collection document via cloud function
+    const username = data.username;
     const uid = auth ? auth.uid : "";
-    await db
-      .collection("usernames")
-      .doc(auth?.uid)
-      .set({
-        username: data.username,
-      })
-      .then(() => {
-        db.collection("usernames")
-          .doc("list")
-          .update({
-            [uid]: data.username,
+    // change to cloud function to check username uniquity before
+    const createUsername = firebase.functions().httpsCallable("createUsername");
+    createUsername({ username, uid })
+      .then((result) => {
+        if (result.data === true) {
+          setIsSubmitting(false);
+        } else if (result.data === false) {
+          setIsSubmitting(false);
+          setAlert({
+            show: true,
+            type: "danger",
+            messages: ["Username not available"],
           });
-        // push createdProfile: true to userProfile context
-        history.push("dashboard");
-        setIsSubmitting(false);
+          console.log(result);
+        }
       })
       // if username can't be created, can not advance
       .catch((error) => {

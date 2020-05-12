@@ -4,7 +4,7 @@ import * as sharp from "sharp";
 import * as fs from "fs-extra";
 import { dirname, join } from "path";
 import * as storage from "@google-cloud/storage";
-import slugify from "slugify";
+// import slugify from "slugify";
 
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -13,7 +13,6 @@ const usersRef = admin.firestore().collection("users");
 
 export const usernameIsTaken = functions.https.onCall((data: any) => {
   const username = data.username;
-
   return usersRef
     .where("username", "==", username)
     .get()
@@ -26,47 +25,126 @@ export const usernameIsTaken = functions.https.onCall((data: any) => {
     });
 });
 
+// unique username checker
+export const createUsername = functions.https.onCall(
+  async (data: any, context) => {
+    if (context.auth) {
+      const username = data.username;
+      const uid = context.auth.uid;
+      console.log(`Request create username '${username}' for user ${uid}`);
+
+      //
+      const userHasUsername = async (uid: string): Promise<boolean> => {
+        console.log(`Checking if user ${uid} already has a username`);
+        return await usersRef
+          .doc(uid)
+          .get()
+          .then((doc: any) => {
+            const username = doc.data().username;
+            if (username) {
+              console.log("Has username, ", username);
+              return true;
+            } else {
+              console.log("User does not have username, proceed...");
+              return false;
+            }
+          });
+      };
+
+      // convert to util 'dataExists'
+      const requestedUsernameIsUnique = async (
+        username: string
+      ): Promise<boolean> => {
+        console.log(
+          `Checking if requested username (${username}) is available`
+        );
+        return await usersRef
+          .where("username", "==", username)
+          .get()
+          .then((querySnapshot: any) => {
+            if (querySnapshot.docs.length > 0) {
+              console.log(`Found existing username for ${username}`);
+              return false;
+            } else {
+              console.log(`No existing username for ${username}`);
+              return true;
+            }
+          })
+          .catch((err: any) => console.log(err));
+      };
+
+      const setUsername = async (
+        username: string,
+        uid: string
+      ): Promise<void> => {
+        console.log(`Setting username ${username} for user ${uid}`);
+        return await usersRef.doc(uid).update({
+          username,
+          createdUsername: true,
+        });
+      };
+
+      if (
+        (await userHasUsername(uid)) === false &&
+        (await requestedUsernameIsUnique(username)) === true
+      ) {
+        console.log(`create username '${username}' for user ${uid}`);
+        await setUsername(username, uid);
+        return true;
+      } else {
+        console.log("Could not create username");
+        return false;
+      }
+
+      // if no auth for some obscure reason, thanks Typescript
+    } else {
+      console.log("Something else didn't work");
+      return false;
+    }
+  }
+);
+
 // createNewUserDoc - create user document server side
 export const createNewUserDoc = functions.auth.user().onCreate(async (user) => {
   console.log(`Creating document for user ${user.uid}`);
   await usersRef.doc(user.uid).set({
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    createdProfile: false,
+    createdUsername: false,
     emailVerified: false,
     likes: 0,
   });
 });
 
 // uniqueUsername - Create username record in 'usernames' collection
-export const uniqueUsername = functions.firestore
-  .document("usernames/{document}")
-  .onCreate(async (sppDoc: any, context) => {
-    const docId = context.params.document; // this is how to get the document name
-    console.log(docId);
-    // console.log(usernameSlug);
-    const data = sppDoc.data();
-    console.log(data); // the user defined fields:values
-    const usernameSlug = slugify(data.username, {
-      remove: /[$*+~.,()'"!\-:@]/g,
-      lower: true,
-    });
-    // don't write if there's already a username
-    await usersRef
-      .doc(docId)
-      .get()
-      .then((doc: { data: () => any }) => {
-        const user = doc.data();
-        if (user.username && user.slug) {
-          console.log("Already have username / slug");
-          return;
-        }
-      });
-    // write username if no username
-    await usersRef.doc(docId).update({
-      username: data.username,
-      slug: usernameSlug,
-    });
-  });
+// export const uniqueUsername = functions.firestore
+//   .document("usernames/{document}")
+//   .onCreate(async (sppDoc: any, context) => {
+//     const docId = context.params.document; // this is how to get the document name
+//     console.log(docId);
+//     // console.log(usernameSlug);
+//     const data = sppDoc.data();
+//     console.log(data); // the user defined fields:values
+//     const usernameSlug = slugify(data.username, {
+//       remove: /[$*+~.,()'"!\-:@]/g,
+//       lower: true,
+//     });
+//     // don't write if there's already a username
+//     await usersRef
+//       .doc(docId)
+//       .get()
+//       .then((doc: { data: () => any }) => {
+//         const user = doc.data();
+//         if (user.username && user.slug) {
+//           console.log("Already have username / slug");
+//           return;
+//         }
+//       });
+//     // write username if no username
+//     await usersRef.doc(docId).update({
+//       username: data.username,
+//       slug: usernameSlug,
+//     });
+//   });
 
 // Thumbnail generator
 const sizes = [64, 128, 256];
