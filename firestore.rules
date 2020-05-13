@@ -1,25 +1,65 @@
 rules_version = '2';
 service cloud.firestore {
+
   match /databases/{database}/documents {
   
-    match /users/{userId} {
-      // allow everyone to read public profiles
-      allow read;
-      // only allow owner to create/update their public profile
-      allow create, write, update: if request.auth.uid == userId;
-      }
+    function getUserData() {
+      return get(/users/$(request.auth.uid)).data
     }
-  
-    match /usersPrivate/{userId} {
-    // only allow owner to read their private profile
-    allow read: if request.auth.uid == userId;
-    // 1) allow user to create/update their own profile
-    // 2) do not allow user to change [registeredEvents, profileId, status, contactId] field
-    allow create, write, update: if request.auth.uid == userId 
-                          && !("registeredEvents" in request.writeFields)
-                          && !("profileId" in request.writeFields)
-                          && !("status" in request.writeFields)
-                          && !("contactId" in request.writeFields);
-  	}
 
+  	// [FUNCTIONS]
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function authId() {
+      return request.auth.uid;
+    }
+    
+    function emailVerified() {
+      return request.auth.token.email_verified;
+    }
+    
+    // [READ] Data that exists on the Firestore document
+    function existingData() {
+      return resource.data;
+    }
+    
+    // [WRITE] Data that is sent to a Firestore document
+    function incomingData() {
+      return request.resource.data;
+    }
+
+  	// User data
+    match /users/{docId} {
+      allow read;
+      // allow read if createdUsername && emailVerified
+      // allow write / update, but not username or slug fields
+      allow create: if false;
+      allow write, update: if
+                  	request.auth.uid == docId
+                    // && emailVerified()
+                    && getUserData().createdUsername == true
+       							&& !("username" in request.writeFields)
+                    // Same thing? Test later
+                    // && !incomingData().username
+       							&& !("createdUsername" in request.writeFields)
+       							&& !("emailVerified" in request.writeFields)
+       							&& !("slug" in request.writeFields);
+    }  	
+
+    match /usersPrivate/{docId} {
+    	allow create: if false;
+      // only allow owner to read their private profile
+      allow read: if request.auth.uid == docId;
+    }
+    
+    // Wall 
+  	match /walls/{document=**} {
+    	allow read;
+      // walls create messages, only if submitted user: uid match request.auth.uid
+      // only if username matches docId.data.username 
+      // ... or cloud function?
+    }
+	}
 }

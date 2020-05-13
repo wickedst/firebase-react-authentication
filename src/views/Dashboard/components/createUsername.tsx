@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import firebase from "../../../firebase";
 import "firebase/auth";
 import "firebase/firestore";
@@ -11,12 +11,28 @@ import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
 import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
 import * as yup from "yup";
-import { useHistory } from "react-router-dom";
+import { AuthContext } from "../../../AuthProvider";
 
+const usernameIsTaken = firebase.functions().httpsCallable("usernameIsTaken");
+yup.addMethod(yup.string, "usernameIsTaken", function (
+  message: string = "Username taken"
+) {
+  return this.test("test-name", message, async function (
+    value
+  ): Promise<any | yup.ValidationError> {
+    return await usernameIsTaken({ username: value })
+      .then(function (result) {
+        return !result.data;
+      })
+      .catch((err) => console.log(err));
+  });
+});
 const schema = yup.object({
   username: yup
     .string()
     .required()
+    // @ts-ignore
+    .usernameIsTaken()
     .min(3)
     .max(15)
     .matches(
@@ -25,36 +41,51 @@ const schema = yup.object({
     ),
 });
 
-const CreateProfile = () => {
+const CreateUsername = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   // prettier-ignore
   const [alert, setAlert] = useState<{ show: boolean; type: string; messages: [string] }>({ show: false, type: "", messages: [""] });
-  const history = useHistory();
+  const { setUserProfile } = useContext(AuthContext);
 
   const handleCreateProfile = async (data: { username: string }) => {
     setIsSubmitting(true);
     // prettier-ignore
     const auth = firebaseGetAuth();
-
-    const db = firebase.firestore();
-    // create username entry in usernames collection
-    // username / slug will be added to users collection document via cloud function
     const username = data.username;
     const uid = auth ? auth.uid : "";
-    // change to cloud function to check username uniquity before
+    // Cloud function for creating unique username
     const createUsername = firebase.functions().httpsCallable("createUsername");
     createUsername({ username, uid })
       .then((result) => {
-        if (result.data === true) {
+        // server side validation
+        if (typeof result.data !== "boolean") {
           setIsSubmitting(false);
-        } else if (result.data === false) {
+          let errors = result.data;
+          let errorMsgs = errors.map((error: { message: string }) => {
+            return error.message;
+          });
+          setAlert({
+            show: true,
+            type: "danger",
+            messages: errorMsgs,
+          });
+        }
+        // username taken
+        if (result.data === false) {
           setIsSubmitting(false);
           setAlert({
             show: true,
             type: "danger",
             messages: ["Username not available"],
           });
-          console.log(result);
+        }
+        // success
+        if (result.data === true) {
+          setIsSubmitting(false);
+          setUserProfile(
+            (profile: any) =>
+              (profile = { ...profile, ...{ createdUsername: true, username } })
+          );
         }
       })
       // if username can't be created, can not advance
@@ -66,7 +97,7 @@ const CreateProfile = () => {
   };
   return (
     <>
-      <h1>Create your profile</h1>
+      <h1>Create your username</h1>
       <p>
         You've registered using your email, [email]. Now finish your profile
       </p>
@@ -83,9 +114,11 @@ const CreateProfile = () => {
           <FormikForm className="offset-md-3 col-md-6">
             {alert.show && (
               <div className={`alert alert-${alert.type} small`}>
-                {alert.messages.map((message, index) => (
-                  <div key={index}>{message}</div>
-                ))}
+                <ul className="list-unstyled mb-0 text-left">
+                  {alert.messages.map((message) => (
+                    <li>{message}</li>
+                  ))}
+                </ul>
               </div>
             )}
             <Form.Group>
@@ -102,7 +135,7 @@ const CreateProfile = () => {
                 // prettier-ignore
                 <> <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /><span className="sr-only">Loading...</span> </>
               ) : (
-                "Sign Up"
+                "Submit"
               )}
             </button>
           </FormikForm>
@@ -112,4 +145,4 @@ const CreateProfile = () => {
   );
 };
 
-export default CreateProfile;
+export default CreateUsername;

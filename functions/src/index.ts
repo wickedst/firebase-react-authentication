@@ -5,13 +5,14 @@ import * as fs from "fs-extra";
 import { dirname, join } from "path";
 import * as storage from "@google-cloud/storage";
 import slugify from "slugify";
-// import * as yup from "yup";
+import * as yup from "yup";
+import { ValidationError } from "yup";
 
 const admin = require("firebase-admin");
 admin.initializeApp();
 
+// for front-end username validation
 const usersRef = admin.firestore().collection("users");
-
 export const usernameIsTaken = functions.https.onCall((data: any) => {
   const username = data.username;
   return usersRef
@@ -26,31 +27,38 @@ export const usernameIsTaken = functions.https.onCall((data: any) => {
     });
 });
 
-// const schema = yup.object({
-//   username: yup
-//     .string()
-//     .required()
-//     .min(3)
-//     .max(15)
-//     .matches(
-//       /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/,
-//       "Can not contain spaces or special characters"
-//     ),
-// });
+const schema = yup.object({
+  username: yup
+    .string()
+    .required()
+    .min(3)
+    .max(15)
+    .matches(
+      /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/,
+      "Can not contain spaces or special characters"
+    ),
+});
+const formatYupError = (err: ValidationError) => {
+  const errors: Array<{ path: string; message: string }> = [];
+  err.inner.forEach((e) => {
+    errors.push({
+      path: e.path,
+      message: e.message,
+    });
+  });
 
+  return errors;
+};
 // unique username checker
 export const createUsername = functions.https.onCall(
   async (data: any, context) => {
     const username = data.username;
 
-    // if (await schema.validate(username)) {
-    //   return new Error();
-    // }
-    // try {
-    //   await schema.validate(username, { abortEarly: false });
-    // } catch (err) {
-    //   return formatYupError(err);
-    // }
+    try {
+      await schema.validate({ username: data.username }, { abortEarly: false });
+    } catch (err) {
+      return formatYupError(err);
+    }
 
     if (context.auth) {
       const uid = context.auth.uid;
@@ -142,37 +150,6 @@ export const createNewUserDoc = functions.auth.user().onCreate(async (user) => {
     likes: 0,
   });
 });
-
-// uniqueUsername - Create username record in 'usernames' collection
-// export const uniqueUsername = functions.firestore
-//   .document("usernames/{document}")
-//   .onCreate(async (sppDoc: any, context) => {
-//     const docId = context.params.document; // this is how to get the document name
-//     console.log(docId);
-//     // console.log(usernameSlug);
-//     const data = sppDoc.data();
-//     console.log(data); // the user defined fields:values
-//     const usernameSlug = slugify(data.username, {
-//       remove: /[$*+~.,()'"!\-:@]/g,
-//       lower: true,
-//     });
-//     // don't write if there's already a username
-//     await usersRef
-//       .doc(docId)
-//       .get()
-//       .then((doc: { data: () => any }) => {
-//         const user = doc.data();
-//         if (user.username && user.slug) {
-//           console.log("Already have username / slug");
-//           return;
-//         }
-//       });
-//     // write username if no username
-//     await usersRef.doc(docId).update({
-//       username: data.username,
-//       slug: usernameSlug,
-//     });
-//   });
 
 // Thumbnail generator
 const sizes = [64, 128, 256];

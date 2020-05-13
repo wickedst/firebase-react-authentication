@@ -40,7 +40,9 @@ const MyNavbar = () => {
           <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
         </NavDropdown>
       </>
-    ) : null;
+    ) : (
+      <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+    );
 
   const NavLoggedOut = () =>
     !loadingAuthState ? (
@@ -53,7 +55,6 @@ const MyNavbar = () => {
         </Nav.Link>
       </>
     ) : null;
-
   return (
     <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark">
       <Navbar.Brand to="/" as={Link}>
