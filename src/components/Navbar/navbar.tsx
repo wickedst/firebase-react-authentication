@@ -37,6 +37,10 @@ const MyNavbar = () => {
             Dashboard
           </NavDropdown.Item>
           <NavDropdown.Divider />
+          <NavDropdown.Item to="/account" as={Link}>
+            Account Settings
+          </NavDropdown.Item>
+          <NavDropdown.Divider />
           <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
         </NavDropdown>
       </>

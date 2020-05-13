@@ -6,7 +6,7 @@ import FormField from "../FormFields/FormField";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
 import * as yup from "yup";
-import firebaseGetAuth from "../../utils/firebaseGetAuthId";
+import firebaseGetAuth from "../../utils/firebaseGetAuth";
 
 const schema = yup.object({
   message: yup.string().required().min(1).max(350),

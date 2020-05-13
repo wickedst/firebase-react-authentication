@@ -9,6 +9,7 @@ import { AuthRoutes } from "../views/Auth";
 import PrivateRoute from "./routes/PrivateRoute";
 import LoggedInRoute from "./routes/LoggedInRoute";
 import { DashboardRoutes } from "../views/Dashboard";
+import { AccountRoutes } from "../views/Account";
 import { Home } from "../views/Home/components";
 import { Profile } from "../views/Profile/components";
 import Navbar from "../components/Navbar/navbar";
@@ -24,6 +25,7 @@ const ApplicationRoutes = () => {
         <Route exact path="/profile/:slug" component={Profile} />
         <LoggedInRoute path="/auth" component={AuthRoutes} />
         <PrivateRoute exact path="/dashboard" component={DashboardRoutes} />
+        <PrivateRoute exact path="/account" component={AccountRoutes} />
         <Route path="/auth" component={AuthRoutes} />
         <Route exact path="/forgot-password" component={ForgotPassword} />
         {/* <Redirect to="/auth" from="/" /> */}

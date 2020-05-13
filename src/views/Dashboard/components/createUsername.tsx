@@ -9,7 +9,7 @@ import { Form as FormikForm } from "formik";
 import FormField from "../../../components/FormFields/FormField";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
-import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
+import firebaseGetAuth from "../../../utils/firebaseGetAuth";
 import * as yup from "yup";
 import { AuthContext } from "../../../AuthProvider";
 

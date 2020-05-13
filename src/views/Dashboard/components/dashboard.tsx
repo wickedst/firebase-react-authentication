@@ -12,7 +12,7 @@ import * as yup from "yup";
 
 import uploadFile from "../../../utils/uploadFileToStorage";
 import firebaseUpdateUser from "../../../utils/firebaseUpdateUser";
-import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
+import firebaseGetAuth from "../../../utils/firebaseGetAuth";
 import CreateUsername from "./createUsername";
 
 const schema = yup.object({

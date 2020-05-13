@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import firebase from "firebase";
 import FormWallMessage from "../../../components/Forms/FormWallMessage";
-import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
+import firebaseGetAuth from "../../../utils/firebaseGetAuth";
 import { formatDistanceToNowStrict } from "date-fns";
 import sortBy from "lodash.sortby";
 

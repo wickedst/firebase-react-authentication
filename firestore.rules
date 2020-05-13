@@ -33,8 +33,6 @@ service cloud.firestore {
   	// User data
     match /users/{docId} {
       allow read;
-      // allow read if createdUsername && emailVerified
-      // allow write / update, but not username or slug fields
       allow create: if false;
       allow write, update: if
                   	request.auth.uid == docId
