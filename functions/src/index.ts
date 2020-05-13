@@ -4,7 +4,8 @@ import * as sharp from "sharp";
 import * as fs from "fs-extra";
 import { dirname, join } from "path";
 import * as storage from "@google-cloud/storage";
-// import slugify from "slugify";
+import slugify from "slugify";
+// import * as yup from "yup";
 
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -25,14 +26,40 @@ export const usernameIsTaken = functions.https.onCall((data: any) => {
     });
 });
 
+// const schema = yup.object({
+//   username: yup
+//     .string()
+//     .required()
+//     .min(3)
+//     .max(15)
+//     .matches(
+//       /^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$/,
+//       "Can not contain spaces or special characters"
+//     ),
+// });
+
 // unique username checker
 export const createUsername = functions.https.onCall(
   async (data: any, context) => {
+    const username = data.username;
+
+    // if (await schema.validate(username)) {
+    //   return new Error();
+    // }
+    // try {
+    //   await schema.validate(username, { abortEarly: false });
+    // } catch (err) {
+    //   return formatYupError(err);
+    // }
+
     if (context.auth) {
-      const username = data.username;
       const uid = context.auth.uid;
       console.log(`Request create username '${username}' for user ${uid}`);
 
+      const usernameSlug = slugify(username, {
+        remove: /[$*+~.,()'"!\-:@]/g,
+        lower: true,
+      });
       //
       const userHasUsername = async (uid: string): Promise<boolean> => {
         console.log(`Checking if user ${uid} already has a username`);
@@ -81,6 +108,7 @@ export const createUsername = functions.https.onCall(
         return await usersRef.doc(uid).update({
           username,
           createdUsername: true,
+          slug: usernameSlug,
         });
       };
 

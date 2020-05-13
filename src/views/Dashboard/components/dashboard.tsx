@@ -13,7 +13,7 @@ import * as yup from "yup";
 import uploadFile from "../../../utils/uploadFileToStorage";
 import firebaseUpdateUser from "../../../utils/firebaseUpdateUser";
 import firebaseGetAuth from "../../../utils/firebaseGetAuthId";
-import CreateProfile from "./createProfile";
+import CreateUsername from "./createUsername";
 
 const schema = yup.object({
   avatar: yup
@@ -114,11 +114,11 @@ const Dashboard = () => {
 
   return (
     <div className="container text-center py-4">
-      {!userProfile?.createdProfile ? (
-        <CreateProfile />
+      {!userProfile?.createdUsername ? (
+        <CreateUsername />
       ) : (
         <div>
-          {userProfile.avatar && (
+          {userProfile.avatarFull && (
             <div>
               <img
                 src={
