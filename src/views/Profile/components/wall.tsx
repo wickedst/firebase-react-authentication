@@ -16,15 +16,17 @@ export interface WallMessage {
   };
 }
 
-const wallsRef = firebase.firestore().collection("walls");
-
 const Wall = (props: any) => {
   const [wallMessages, setWallMessages] = useState<WallMessage[]>([]);
 
+  const wallsRef = firebase
+    .firestore()
+    .collection("walls")
+    .doc(props.profile.slug) // change to uid
+    .collection("messages");
+
   useEffect(() => {
     wallsRef
-      .doc(props.profile.slug)
-      .collection("messages")
       .orderBy("timestamp")
       .get()
       .then((snapshot: any) => {
@@ -34,13 +36,11 @@ const Wall = (props: any) => {
         });
       })
       .catch((err) => console.log(err));
-  }, [props.profile.slug]);
+  }, [props.profile.slug, wallsRef]);
 
   const messageAddHandler = (message: any) => {
     // firebaseAddWallMessage
     wallsRef
-      .doc(props.profile.slug)
-      .collection("messages")
       .add(message)
       .then(() => {
         console.log("added message?");
@@ -48,6 +48,7 @@ const Wall = (props: any) => {
       })
       .catch((error) => {
         console.log(error.message);
+        // toast
       });
   };
 
