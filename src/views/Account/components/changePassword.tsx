@@ -55,7 +55,7 @@ const ChangePassword = () => {
       }}
     >
       {() => (
-        <FormikForm className="offset-md-3 col-md-6">
+        <FormikForm>
           {alert.show && (
             <div className={`alert alert-${alert.type} small`}>
               {alert.messages.map((message, index) => (
