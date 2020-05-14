@@ -61,8 +61,7 @@ const Wall = (props: any) => {
           return (
             <div key={index} className="mb-1">
               <div className="small">
-                {message.user.username}
-                {" - "}
+                {message.user.username} {" - "}
                 <span className="text-muted">
                   {formatDistanceToNowStrict(message.timestamp, {
                     addSuffix: true,
