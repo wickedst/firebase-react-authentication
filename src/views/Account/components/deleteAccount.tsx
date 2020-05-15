@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Formik } from "formik";
@@ -7,6 +7,10 @@ import FormField from "../../../components/FormFields/FormField";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
 import * as yup from "yup";
+import firebaseGetAuth from "../../../utils/firebaseGetAuth";
+import { firestore, auth } from "firebase";
+import { useHistory } from "react-router-dom";
+import { AuthContext } from "../../../AuthProvider";
 
 const schema = yup.object({
   deleteAccountConfirm: yup.string().required(),
@@ -15,9 +19,29 @@ const schema = yup.object({
 const DeleteAccount = () => {
   const [show, setShow] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
+  const uid = firebaseGetAuth()?.uid;
+  const { addToasts } = useContext(AuthContext);
+  const history = useHistory();
+  // modal
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  const handleDeleteAccount = async () => {
+    const usersRef = firestore().collection("users");
+    const usersPrivateRef = firestore().collection("usersPrivate");
+
+    await usersRef.doc(uid).delete();
+    await usersPrivateRef.doc(uid).delete();
+    auth()
+      .signOut()
+      .then(() => {
+        history.push("/");
+        addToasts((prevToasts: any) => [
+          ...prevToasts,
+          { variant: "info", message: "Account deleted successfully" },
+        ]);
+      });
+  };
 
   return (
     <>
@@ -36,8 +60,8 @@ const DeleteAccount = () => {
           initialValues={{
             deleteAccountConfirm: "",
           }}
-          onSubmit={(data) => {
-            console.log(data);
+          onSubmit={() => {
+            handleDeleteAccount();
           }}
         >
           <FormikForm>

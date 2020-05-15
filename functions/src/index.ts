@@ -7,6 +7,7 @@ import * as storage from "@google-cloud/storage";
 import slugify from "slugify";
 import * as yup from "yup";
 import { ValidationError } from "yup";
+import { createDeflate } from "zlib";
 
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -146,12 +147,13 @@ export const createUsername = functions.https.onCall(
 export const createNewUserDoc = functions.auth.user().onCreate(async (user) => {
   console.log(`Creating document for user ${user.uid}`);
   await usersRef.doc(user.uid).set({
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    createdUsername: false,
-    emailVerified: false,
+    createdat: admin.firestore.fieldvalue.servertimestamp(),
+    createdusername: false,
+    emailverified: false,
     likes: 0,
   });
   await usersPrivateRef.doc(user.uid).set({
+    createdat: admin.firestore.fieldvalue.servertimestamp(),
     notificationSettings: {
       notificationWhenWall: true,
       notificationWhenLike: false,
@@ -259,4 +261,30 @@ export const generateThumbs = functions.storage
       // 6. Cleanup remove the tmp/thumbs from the filesystem
       return fs.remove(workingDir);
     }
+  });
+
+exports.deleteUser = functions.firestore
+
+  .document("usersPrivate/{userID}")
+  .onDelete((snap, context) => {
+    // Get an object representing the document prior to deletion
+    // e.g. {'name': 'Marie', 'age': 66}
+    console.log("deleteUser context", context);
+    const deletedValue = snap.data();
+    console.log("deletedValue ", deletedValue);
+
+    console.log(deletedValue);
+    // data on deleted users we want to keep
+    admin
+      .firestore()
+      .collection("usersPrivate")
+      .doc(context.params.userID)
+      .set({
+        // deletedOn,
+        // email,
+        createdAt: deletedValue.createdat || null,
+        deletedAt: admin.firestore.fieldvalue.servertimestamp(),
+        // username
+      });
+    // perform desired operations ...
   });

@@ -4,7 +4,6 @@ import { Form as FormikForm } from "formik";
 import FormFieldCheckbox from "../../../components/FormFields/FormFieldCheckbox";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
-import firebase from "../../../firebase";
 import "firebase/firestore";
 import firebaseUpdateUserPrivate from "../../../utils/firebaseUpdateUserPrivate";
 import firebaseGetAuth from "../../../utils/firebaseGetAuth";
