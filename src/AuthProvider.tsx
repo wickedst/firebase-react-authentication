@@ -5,6 +5,7 @@ import "firebase/firestore";
 type ContextProps = {
   user: firebase.User | null;
   userProfile: firebase.firestore.DocumentData | null;
+  userPrivate: firebase.firestore.DocumentData | null;
   authenticated: boolean;
   setUser: any;
   setUserProfile: any;
@@ -18,6 +19,9 @@ export const AuthContext = React.createContext<Partial<ContextProps>>({});
 export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState(null as firebase.User | null);
   const [userProfile, setUserProfile] = useState(
+    {} as firebase.firestore.DocumentData | null
+  );
+  const [userPrivate, setUserPrivate] = useState(
     {} as firebase.firestore.DocumentData | null
   );
   const [loadingAuthState, setLoadingAuthState] = useState(true);
@@ -35,17 +39,19 @@ export const AuthProvider = ({ children }: any) => {
       // Get user profile
       if (user !== null) {
         const db = firebase.firestore();
-        db.collection("users")
-          .doc(firebase.auth().currentUser!.uid)
-          .get()
-          .then((res) => {
+        // prettier-ignore
+        db.collection("users").doc(firebase.auth().currentUser!.uid).get().then((res) => {
             const user = res.data();
-            if (user) {
-              console.log("Set user profile: ", user);
-              setUserProfile(user);
-            } else {
-              setUserProfile(null);
-            }
+            user ? setUserProfile(user) : setUserProfile(null)
+          })
+          .catch((error) => {
+            console.log(error);
+            setUserProfile(null);
+          });
+        // prettier-ignore
+        db.collection("usersPrivate").doc(firebase.auth().currentUser!.uid).get().then((res) => {
+            const user = res.data();
+            user ? setUserPrivate(user) : setUserPrivate(null)
           })
           .catch((error) => {
             console.log(error);
@@ -65,6 +71,7 @@ export const AuthProvider = ({ children }: any) => {
         setUser,
         authenticated: user !== null,
         userProfile,
+        userPrivate,
         setUserProfile,
         loadingAuthState,
         toasts,

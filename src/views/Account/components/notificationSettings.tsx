@@ -4,25 +4,36 @@ import { Form as FormikForm } from "formik";
 import FormFieldCheckbox from "../../../components/FormFields/FormFieldCheckbox";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
+import firebase from "../../../firebase";
+import "firebase/firestore";
+import firebaseUpdateUserPrivate from "../../../utils/firebaseUpdateUserPrivate";
+import firebaseGetAuth from "../../../utils/firebaseGetAuth";
 
-const NotificationSettings = () => {
+const NotificationSettings = (props: { notificationSettings: {} }) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { notificationSettings = {} } = props;
+  const uid = firebaseGetAuth()?.uid;
+
+  const handleSubmit = (data: {}) => {
+    const payload = { notificationSettings: data };
+    console.log(payload);
+    setIsSubmitting(true);
+    uid &&
+      firebaseUpdateUserPrivate(payload, uid).then(() =>
+        setIsSubmitting(false)
+      );
+  };
 
   return (
     <Formik
-      initialValues={{
-        notificationWhenWall: true,
-        notificationWhenLike: false,
-        //
-        notificationTypeDrawer: false,
-        notificationTypeEmail: false,
-        notificationTypePush: false,
-      }}
+      initialValues={notificationSettings}
+      enableReinitialize={true}
       onSubmit={(data) => {
         console.log(data);
+        handleSubmit(data);
       }}
     >
-      {(initialValues) => (
+      {() => (
         <FormikForm>
           <h4>Notification events</h4>
           <p className="text-muted">Notify me when...</p>
@@ -32,7 +43,7 @@ const NotificationSettings = () => {
               label="Someone posts on my wall"
             />
           </Form.Group>
-          <Form.Group>
+          {/* <Form.Group>
             <FormFieldCheckbox
               name="notificationWhenLike"
               label="Someone likes my profile"
@@ -54,7 +65,7 @@ const NotificationSettings = () => {
               name="notificationTypePush"
               label="Push notifications (enable in this browser)"
             />
-          </Form.Group>
+          </Form.Group> */}
           {/* prettier-ignore */}
           <button disabled={isSubmitting} type="submit" className={`btn btn-primary btn-block`} >
               {isSubmitting ? (

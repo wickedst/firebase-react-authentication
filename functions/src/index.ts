@@ -13,6 +13,8 @@ admin.initializeApp();
 
 // for front-end username validation
 const usersRef = admin.firestore().collection("users");
+const usersPrivateRef = admin.firestore().collection("usersPrivate");
+
 export const usernameIsTaken = functions.https.onCall((data: any) => {
   const username = data.username;
   return usersRef
@@ -148,6 +150,16 @@ export const createNewUserDoc = functions.auth.user().onCreate(async (user) => {
     createdUsername: false,
     emailVerified: false,
     likes: 0,
+  });
+  await usersPrivateRef.doc(user.uid).set({
+    notificationSettings: {
+      notificationWhenWall: true,
+      notificationWhenLike: false,
+      //
+      notificationTypeDrawer: true,
+      notificationTypeEmail: true,
+      notificationTypePush: false,
+    },
   });
 });
 

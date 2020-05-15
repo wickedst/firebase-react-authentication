@@ -1,9 +1,8 @@
 import firebase from "firebase";
 
-const usersRef = firebase.firestore().collection("users");
-
-const firebaseUpdateUser = (payload: any, uid: string) => {
+const firebaseUpdateUserPrivate = (payload: any, uid: string) => {
   return new Promise((resolve, reject) => {
+    const usersRef = firebase.firestore().collection("usersPrivate");
     usersRef
       .doc(uid)
       .update(payload)
@@ -12,4 +11,4 @@ const firebaseUpdateUser = (payload: any, uid: string) => {
   });
 };
 
-export default firebaseUpdateUser;
+export default firebaseUpdateUserPrivate;
