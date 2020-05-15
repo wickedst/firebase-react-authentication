@@ -39,12 +39,14 @@ const NotificationSettings = (props: { notificationSettings: {} }) => {
           <p className="text-muted">Notify me when...</p>
           <Form.Group>
             <FormFieldCheckbox
+              type="switch"
               name="notificationWhenWall"
               label="Someone posts on my wall"
             />
           </Form.Group>
-          {/* <Form.Group>
+          <Form.Group>
             <FormFieldCheckbox
+              type="switch"
               name="notificationWhenLike"
               label="Someone likes my profile"
             />
@@ -53,19 +55,25 @@ const NotificationSettings = (props: { notificationSettings: {} }) => {
           <p className="text-muted">Notify me how...</p>
           <Form.Group>
             <FormFieldCheckbox
+              type="switch"
               name="notificationTypeDrawer"
               label="Tray notifications"
             />
           </Form.Group>
           <Form.Group>
-            <FormFieldCheckbox name="notificationTypeEmail" label="Email" />
+            <FormFieldCheckbox
+              type="switch"
+              name="notificationTypeEmail"
+              label="Email"
+            />
           </Form.Group>
           <Form.Group>
             <FormFieldCheckbox
+              type="switch"
               name="notificationTypePush"
               label="Push notifications (enable in this browser)"
             />
-          </Form.Group> */}
+          </Form.Group>
           {/* prettier-ignore */}
           <button disabled={isSubmitting} type="submit" className={`btn btn-primary btn-block`} >
               {isSubmitting ? (

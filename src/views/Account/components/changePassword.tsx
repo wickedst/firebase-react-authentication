@@ -73,7 +73,7 @@ const ChangePassword = () => {
           </Form.Group>
           <Form.Group>
             <FormField
-              placeholder="Password"
+              placeholder="New Password"
               name="password"
               type="password"
               autoComplete="new-password"

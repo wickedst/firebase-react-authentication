@@ -4,35 +4,17 @@ import { useField } from "formik";
 
 const MyField = (props: any) => {
   const [field, meta] = useField(props);
-  const [myTouched, setMyTouched] = useState(false);
-
-  let checked = meta.initialValue;
-  if (myTouched && !meta.touched && meta.initialValue) {
-    checked = false;
-  } else if (meta.touched) {
-    checked = meta.value;
-  }
-
-  console.log(checked);
 
   return (
-    <>
-      <div className="form-check">
-        <input
-          type="checkbox"
-          custom
-          {...field}
-          {...props}
-          className="form-check-input"
-          name={props.name}
-          id={props.name}
-          value={props.name}
-          checked={meta.value || false}
-          defaultChecked={meta.initialValue}
-        />
-        <label className="form-check-label"> Default radio </label>
-      </div>{" "}
-    </>
+    <Form.Check
+      {...field}
+      {...props}
+      name={props.name}
+      id={props.name}
+      value={props.name}
+      checked={meta.value || false} // this line accounts for asynchronous initialValues in parent
+      defaultChecked={meta.initialValue}
+    />
   );
 };
 
