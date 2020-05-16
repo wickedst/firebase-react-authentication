@@ -7,7 +7,6 @@ import * as storage from "@google-cloud/storage";
 import slugify from "slugify";
 import * as yup from "yup";
 import { ValidationError } from "yup";
-import { createDeflate } from "zlib";
 
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -78,10 +77,12 @@ export const createUsername = functions.https.onCall(
           .doc(uid)
           .get()
           .then((doc: any) => {
-            const username = doc.data().username;
-            if (username) {
-              console.log("Has username, ", username);
+            if (doc.data().username) {
+              console.log("Has username");
               return true;
+            } else if (!doc.data().username) {
+              console.log("User does not have username, proceed...");
+              return false;
             } else {
               console.log("User does not have username, proceed...");
               return false;
@@ -147,13 +148,13 @@ export const createUsername = functions.https.onCall(
 export const createNewUserDoc = functions.auth.user().onCreate(async (user) => {
   console.log(`Creating document for user ${user.uid}`);
   await usersRef.doc(user.uid).set({
-    createdat: admin.firestore.fieldvalue.servertimestamp(),
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
     createdusername: false,
     emailverified: false,
     likes: 0,
   });
   await usersPrivateRef.doc(user.uid).set({
-    createdat: admin.firestore.fieldvalue.servertimestamp(),
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
     notificationSettings: {
       notificationWhenWall: true,
       notificationWhenLike: false,
@@ -264,8 +265,7 @@ export const generateThumbs = functions.storage
   });
 
 exports.deleteUser = functions.firestore
-
-  .document("usersPrivate/{userID}")
+  .document("users/{userID}")
   .onDelete((snap, context) => {
     // Get an object representing the document prior to deletion
     // e.g. {'name': 'Marie', 'age': 66}
@@ -277,14 +277,15 @@ exports.deleteUser = functions.firestore
     // data on deleted users we want to keep
     admin
       .firestore()
-      .collection("usersPrivate")
+      .collection("deletedUsers")
       .doc(context.params.userID)
       .set({
         // deletedOn,
-        // email,
-        createdAt: deletedValue.createdat || null,
-        deletedAt: admin.firestore.fieldvalue.servertimestamp(),
-        // username
+        // email, // from context
+        createdAt: deletedValue?.createdat, // from collection
+        deletedAt: admin.FieldValue.serverTimestamp(),
+        usernameWas: deletedValue?.usernameWas,
+        likesWas: deletedValue?.likes,
       });
     // perform desired operations ...
   });

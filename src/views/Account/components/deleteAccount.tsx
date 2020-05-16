@@ -33,7 +33,9 @@ const DeleteAccount = () => {
     await usersRef.doc(uid).delete();
     await usersPrivateRef.doc(uid).delete();
     auth()
-      .signOut()
+      .currentUser?.delete()
+      // auth()
+      //   .signOut()
       .then(() => {
         history.push("/");
         addToasts((prevToasts: any) => [

@@ -31,8 +31,8 @@ const schema = yup.object({
   username: yup
     .string()
     .required()
-    // @ts-ignore
-    .usernameIsTaken()
+    // // @ts-ignore
+    // .usernameIsTaken()
     .min(3)
     .max(15)
     .matches(
