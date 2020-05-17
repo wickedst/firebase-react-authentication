@@ -6,9 +6,11 @@ const Toasts = () => {
   const { toasts } = useContext(AuthContext);
   const ftoasts =
     toasts &&
-    toasts.map((toast: { variant: string; message: string }, index: number) => {
-      return <Toast content={toast} key={index} />;
-    });
+    toasts
+      .reverse()
+      .map((toast: { variant: string; message: string }, index: number) => {
+        return <Toast content={toast} key={index} />;
+      });
   return (
     // <div
     //   aria-live="polite"

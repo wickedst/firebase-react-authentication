@@ -282,9 +282,9 @@ exports.deleteUser = functions.firestore
       .set({
         // deletedOn,
         // email, // from context
-        createdAt: deletedValue?.createdat, // from collection
-        deletedAt: admin.FieldValue.serverTimestamp(),
-        usernameWas: deletedValue?.usernameWas,
+        createdAt: deletedValue?.createdAt, // from collection
+        deletedAt: admin.firestore.FieldValue.serverTimestamp(),
+        usernameWas: deletedValue?.username,
         likesWas: deletedValue?.likes,
       });
     // perform desired operations ...

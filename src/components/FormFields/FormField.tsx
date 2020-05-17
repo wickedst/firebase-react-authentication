@@ -12,6 +12,8 @@ const MyField = (props: any) => {
       <Form.Control
         {...field}
         {...props}
+        // type={props.type || "text"}
+        // value={meta.value || ""}
         isValid={meta.touched && !meta.error && meta.value}
         isInvalid={meta.touched && meta.error}
       />

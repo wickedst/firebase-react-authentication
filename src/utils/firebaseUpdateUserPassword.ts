@@ -1,5 +1,7 @@
 import firebase from "firebase";
 
+export const firebaseReauthenticateUser = () => {};
+
 export const firebaseUpdateUserPassword = (
   currentPassword: string,
   newPassword: string

@@ -1,4 +1,7 @@
 import React, { useState, useContext } from "react";
+import firebase from "firebase";
+import { firestore } from "firebase";
+
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Formik } from "formik";
@@ -8,41 +11,65 @@ import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
 import * as yup from "yup";
 import firebaseGetAuth from "../../../utils/firebaseGetAuth";
-import { firestore, auth } from "firebase";
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../../AuthProvider";
 
 const schema = yup.object({
-  deleteAccountConfirm: yup.string().required(),
+  password: yup.string().required(),
 });
 
 const DeleteAccount = () => {
-  const [show, setShow] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const uid = firebaseGetAuth()?.uid;
   const { addToasts } = useContext(AuthContext);
   const history = useHistory();
   // modal
+  const [show, setShow] = useState(true);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = async (password: string) => {
+    console.log(password);
+    setIsSubmitting(true);
+
     const usersRef = firestore().collection("users");
     const usersPrivateRef = firestore().collection("usersPrivate");
+    const user = firebase.auth().currentUser;
+    // re-authenticate user...
+    if (user && user.email) {
+      const cred = firebase.auth.EmailAuthProvider.credential(
+        user.email,
+        password
+      );
+      user
+        .reauthenticateWithCredential(cred)
+        .then(async () => {
+          // ... then delete
+          await usersRef.doc(user.uid).delete();
+          await usersPrivateRef.doc(user.uid).delete();
+          user
+            .delete()
+            // auth()
+            //   .signOut()
+            .then(() => {
+              setIsSubmitting(false);
 
-    await usersRef.doc(uid).delete();
-    await usersPrivateRef.doc(uid).delete();
-    auth()
-      .currentUser?.delete()
-      // auth()
-      //   .signOut()
-      .then(() => {
-        history.push("/");
-        addToasts((prevToasts: any) => [
-          ...prevToasts,
-          { variant: "info", message: "Account deleted successfully" },
-        ]);
-      });
+              history.push("/");
+              addToasts((prevToasts: any) => [
+                ...prevToasts,
+                { variant: "info", message: "Account deleted successfully" },
+              ]);
+            })
+            .catch((error) => {
+              setIsSubmitting(false);
+              console.log(error.message);
+            });
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          console.log(error.message);
+        });
+    }
   };
 
   return (
@@ -60,36 +87,40 @@ const DeleteAccount = () => {
         <Formik
           validationSchema={schema}
           initialValues={{
-            deleteAccountConfirm: "",
+            password: "",
           }}
-          onSubmit={() => {
-            handleDeleteAccount();
+          onSubmit={(data) => {
+            console.log(data);
+            handleDeleteAccount(data.password);
           }}
         >
-          <FormikForm>
-            <Modal.Body>
-              <p>
-                Are you sure you want to delete your account? This change is
-                irreversible.
-              </p>
-              <p>
-                Type <span className="font-weight-bold">DELETE</span> below and
-                click OK to confirm.
-              </p>
-              <Form.Group>
-                <FormField
-                  placeholder="DELETE"
-                  name="deleteAccountConfirm"
-                  type="text"
-                />
-              </Form.Group>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
-                Close
-              </Button>
-              {/* prettier-ignore */}
-              <button disabled={isSubmitting} type="submit" className={`btn btn-primary`} >
+          {() => (
+            <FormikForm>
+              <Modal.Body>
+                <p>
+                  Are you sure you want to delete your account? This change is
+                  irreversible.
+                </p>
+                <p>
+                  <span className="font-weight-bold">
+                    Re-enter your password
+                  </span>{" "}
+                  to confirm deletion.
+                </p>
+                <Form.Group>
+                  <FormField
+                    placeholder="Your Password"
+                    name="password"
+                    type="password"
+                  />
+                </Form.Group>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                  Close
+                </Button>
+                {/* prettier-ignore */}
+                <button disabled={isSubmitting} type="submit" className={`btn btn-primary`} >
               {
               isSubmitting ? (
                 // prettier-ignore
@@ -98,8 +129,9 @@ const DeleteAccount = () => {
               ) : ( "Confirm")
               }
             </button>
-            </Modal.Footer>
-          </FormikForm>
+              </Modal.Footer>
+            </FormikForm>
+          )}
         </Formik>
       </Modal>
     </>
