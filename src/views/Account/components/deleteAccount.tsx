@@ -1,7 +1,4 @@
 import React, { useState, useContext } from "react";
-import firebase from "firebase";
-import { firestore } from "firebase";
-
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Formik } from "formik";
@@ -10,67 +7,22 @@ import FormField from "../../../components/FormFields/FormField";
 import Form from "react-bootstrap/Form";
 import Spinner from "react-bootstrap/Spinner";
 import * as yup from "yup";
-import firebaseGetAuth from "../../../utils/firebaseGetAuth";
-import { useHistory } from "react-router-dom";
+// import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../../AuthProvider";
+import firebaseDeleteUser from "../../../utils/firebaseDeleteUser";
 
 const schema = yup.object({
-  password: yup.string().required(),
+  password: yup
+    .string()
+    .required("You must enter your password correctly to delete your account"),
 });
 
 const DeleteAccount = () => {
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const uid = firebaseGetAuth()?.uid;
-  const { addToasts } = useContext(AuthContext);
-  const history = useHistory();
   // modal
   const [show, setShow] = useState(true);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-
-  const handleDeleteAccount = async (password: string) => {
-    console.log(password);
-    setIsSubmitting(true);
-
-    const usersRef = firestore().collection("users");
-    const usersPrivateRef = firestore().collection("usersPrivate");
-    const user = firebase.auth().currentUser;
-    // re-authenticate user...
-    if (user && user.email) {
-      const cred = firebase.auth.EmailAuthProvider.credential(
-        user.email,
-        password
-      );
-      user
-        .reauthenticateWithCredential(cred)
-        .then(async () => {
-          // ... then delete
-          await usersRef.doc(user.uid).delete();
-          await usersPrivateRef.doc(user.uid).delete();
-          user
-            .delete()
-            // auth()
-            //   .signOut()
-            .then(() => {
-              setIsSubmitting(false);
-
-              history.push("/");
-              addToasts((prevToasts: any) => [
-                ...prevToasts,
-                { variant: "info", message: "Account deleted successfully" },
-              ]);
-            })
-            .catch((error) => {
-              setIsSubmitting(false);
-              console.log(error.message);
-            });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          console.log(error.message);
-        });
-    }
-  };
+  const { addToasts } = useContext(AuthContext);
 
   return (
     <>
@@ -89,12 +41,23 @@ const DeleteAccount = () => {
           initialValues={{
             password: "",
           }}
-          onSubmit={(data) => {
-            console.log(data);
-            handleDeleteAccount(data.password);
+          onSubmit={(data, { setSubmitting, setFieldError }) => {
+            firebaseDeleteUser(data.password)
+              .then(() => {
+                setSubmitting(false);
+                addToasts((prevToasts: any) => [
+                  ...prevToasts,
+                  { variant: "info", message: "Account deleted successfully" },
+                ]);
+              })
+              .catch((error) => {
+                console.log(error);
+                setFieldError("password", "Password didn't match");
+                setSubmitting(false);
+              });
           }}
         >
-          {() => (
+          {({ isSubmitting }) => (
             <FormikForm>
               <Modal.Body>
                 <p>
@@ -121,14 +84,14 @@ const DeleteAccount = () => {
                 </Button>
                 {/* prettier-ignore */}
                 <button disabled={isSubmitting} type="submit" className={`btn btn-primary`} >
-              {
-              isSubmitting ? (
-                // prettier-ignore
-                <> <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /><span className="sr-only">Loading...</span> </>
-                // prettier-ignore
-              ) : ( "Confirm")
-              }
-            </button>
+                  {
+                  isSubmitting ? (
+                    // prettier-ignore
+                    <> <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /><span className="sr-only">Loading...</span> </>
+                    // prettier-ignore
+                  ) : ( "Confirm")
+                  }
+                </button>
               </Modal.Footer>
             </FormikForm>
           )}

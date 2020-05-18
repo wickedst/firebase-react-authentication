@@ -3,13 +3,12 @@
     "module": "commonjs",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "outDir": "lib",
+    "outDir": "build",
     "sourceMap": true,
     "strict": true,
     "allowJs": false,
     "target": "es2017",
     "types": []
   },
-  "compileOnSave": true,
-  "include": ["src"]
+  "include": ["src/**/*.ts"]
 }

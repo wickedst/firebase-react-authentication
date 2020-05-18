@@ -12,7 +12,7 @@
   "engines": {
     "node": "8"
   },
-  "main": "lib/index.js",
+  "main": "build/index.js",
   "dependencies": {
     "@google-cloud/storage": "^4.7.0",
     "@types/sharp": "^0.25.0",
