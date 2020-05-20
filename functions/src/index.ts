@@ -1,13 +1,8 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 
-// import slugify from "slugify";
-// import * as yup from "yup";
-// import { ValidationError } from "yup";
-
 import * as myFunctions from "./lib/index";
 admin.initializeApp();
-
 export const firestoreInstance = admin.firestore();
 
 export const logDeletedUser = functions.firestore
