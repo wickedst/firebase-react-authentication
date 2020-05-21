@@ -9,6 +9,7 @@ const createNewUserDocument = async (user: any) => {
     createdUsername: false,
     emailVerified: false,
     likes: 0,
+    uid: user.uid,
   });
   await firestoreInstance
     .collection("usersPrivate")

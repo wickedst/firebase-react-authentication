@@ -22,7 +22,7 @@ const Wall = (props: any) => {
   const wallsRef = firebase
     .firestore()
     .collection("walls")
-    .doc(props.profile.slug) // change to uid
+    .doc(props.profile.uid) // change to uid
     .collection("messages");
 
   useEffect(() => {
@@ -36,14 +36,14 @@ const Wall = (props: any) => {
         });
       })
       .catch((err) => console.log(err));
-  }, [props.profile.slug, wallsRef]);
+  }, []);
 
   const messageAddHandler = (message: any) => {
-    // firebaseAddWallMessage
+    // // firebaseAddWallMessage
     wallsRef
       .add(message)
       .then(() => {
-        console.log("added message?");
+        console.log("added message?", message);
         setWallMessages((prevWallPosts: any) => [...prevWallPosts, message]);
       })
       .catch((error) => {

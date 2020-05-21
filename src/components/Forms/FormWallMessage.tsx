@@ -26,7 +26,7 @@ const FormWallMessage: React.FC<FormWallMessageProps> = (props) => {
       initialValues={{
         message: "",
       }}
-      onSubmit={(data) => {
+      onSubmit={(data, { resetForm }) => {
         const uid = firebaseGetAuth()?.uid;
         setIsSubmitting(true);
         if (firebaseGetAuth() && userProfile) {
@@ -43,6 +43,7 @@ const FormWallMessage: React.FC<FormWallMessageProps> = (props) => {
           props.onAddMessage(message);
         }
         setIsSubmitting(false);
+        resetForm();
       }}
     >
       {() => (
