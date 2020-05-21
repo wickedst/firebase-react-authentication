@@ -4,11 +4,12 @@ import "firebase/firestore";
 
 type ContextProps = {
   user: firebase.User | null;
-  userProfile: firebase.firestore.DocumentData | null;
-  userPrivate: firebase.firestore.DocumentData | null;
-  authenticated: boolean;
   setUser: any;
+  authenticated: boolean;
+  userProfile: firebase.firestore.DocumentData | null;
   setUserProfile: any;
+  userPrivate: firebase.firestore.DocumentData | null;
+  notifications: firebase.firestore.DocumentData[];
   loadingAuthState: boolean;
   toasts: { message: string; variant: string }[];
   addToasts: any;
@@ -24,6 +25,9 @@ export const AuthProvider = ({ children }: any) => {
   const [userPrivate, setUserPrivate] = useState(
     {} as firebase.firestore.DocumentData | null
   );
+  const [notifications, setNotifications] = useState<
+    firebase.firestore.DocumentData[]
+  >([]);
   const [loadingAuthState, setLoadingAuthState] = useState(true);
   const [toasts, addToasts] = useState<{ message: string; variant: string }[]>(
     []
@@ -39,10 +43,24 @@ export const AuthProvider = ({ children }: any) => {
       // Get user profile
       if (user !== null) {
         const db = firebase.firestore();
+        const uid = firebase.auth().currentUser!.uid;
         // prettier-ignore
-        db.collection("users").doc(firebase.auth().currentUser!.uid).get().then((res) => {
+        db.collection("users").doc(uid).get()
+          .then((res) => {
             const user = res.data();
             user ? setUserProfile(user) : setUserProfile(null)
+          })
+          .then(() => {
+            // notifications listener
+            db.collection("notifications")
+              .where("to", "==", uid)
+              .onSnapshot(function (querySnapshot) {
+                let notifications: firebase.firestore.DocumentData[] = [];
+                querySnapshot.forEach(function (doc) {
+                  notifications.push(doc.data());
+                });
+                setNotifications(notifications);
+            });
           })
           .catch((error) => {
             console.log(error);
@@ -74,6 +92,7 @@ export const AuthProvider = ({ children }: any) => {
         userPrivate,
         setUserProfile,
         loadingAuthState,
+        notifications,
         toasts,
         addToasts,
       }}

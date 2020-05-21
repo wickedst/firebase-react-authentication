@@ -5,7 +5,7 @@ import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { AuthContext } from "../../AuthProvider";
 import { useHistory, Link } from "react-router-dom";
-import Dropdown from "react-bootstrap/Dropdown";
+import NotificationDrawer from "../NotificationDrawer";
 
 const MyNavbar = () => {
   const { loadingAuthState, user, userProfile, addToasts } = useContext(
@@ -29,13 +29,7 @@ const MyNavbar = () => {
   const NavLoggedIn = () =>
     userProfile ? (
       <>
-        <Dropdown alignRight>
-          <Dropdown.Toggle variant="dark" id="dropdown-notifications">
-            <img src="/bell_white.svg" alt="Notifications" width={23} />
-          </Dropdown.Toggle>
-
-          <Dropdown.Menu>LOL</Dropdown.Menu>
-        </Dropdown>
+        <NotificationDrawer />
         <NavDropdown
           alignRight
           title={userProfile.username ? userProfile.username : ``}
