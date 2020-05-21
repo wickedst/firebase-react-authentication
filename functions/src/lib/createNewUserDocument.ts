@@ -6,8 +6,8 @@ const createNewUserDocument = async (user: any) => {
   console.log(`Creating document for user ${user.uid}`);
   await firestoreInstance.collection("users").doc(user.uid).set({
     createdAt: firestore.FieldValue.serverTimestamp(),
-    createdusername: false,
-    emailverified: false,
+    createdUsername: false,
+    emailVerified: false,
     likes: 0,
   });
   await firestoreInstance
