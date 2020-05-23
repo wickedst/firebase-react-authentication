@@ -1,16 +1,9 @@
-import React, { useEffect, useContext } from "react";
-import firebase from "../firebase";
+import React, { useContext } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import { AuthContext } from "../AuthProvider";
 
 const NotificationDrawer = () => {
   const { notifications } = useContext(AuthContext);
-
-  useEffect(() => {
-    console.log(notifications);
-  }, [notifications]);
-
-  const Items = () => {};
 
   return (
     <Dropdown alignRight>

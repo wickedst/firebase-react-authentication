@@ -14,6 +14,7 @@ const Account = () => {
         <div className="card p-2 mb-3">
           <h2>Notifications</h2>
 
+          {/* useEffect() => if !userPrivate.notificationSettings { refresh userPrivate } */}
           {userPrivate ? (
             <NotificationSettings
               notificationSettings={userPrivate.notificationSettings}

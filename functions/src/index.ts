@@ -38,10 +38,10 @@ export const createWallNotification = functions.firestore
   .onCreate((snap, context) => {
     const wallMessageData = snap.data();
 
-    console.log("Wall Message: ", wallMessageData);
-    console.log("Context: ", context);
+    console.log("[createWallNotification] Wall Message: ", wallMessageData);
+    console.log("[createWallNotification] Context: ", context);
 
-    // add rule - wall
+    // add rules - wall
     if (context.params.userID === wallMessageData?.user.uid) {
       console.log("same user, not creating notification");
       return null;
@@ -63,5 +63,31 @@ export const createWallNotification = functions.firestore
       },
     };
 
+    // if usersPrivate/${context.params.userID}/ dot notificationSettings - notificationWhenWall
+
     return myFunctions.createWallNotification(notification);
+  });
+
+export const cloudMessageNotification = functions.firestore
+  .document("notifications/{docID}")
+  .onCreate((snap, context) => {
+    console.log("[cloudMessageNotification] Context: ", context);
+    console.log("[cloudMessageNotification] Snap: ", snap.data());
+    const notificationData = snap.data();
+
+    const payload = {
+      notification: {
+        title: "Test title",
+        body: `${notificationData?.message}`,
+      },
+    };
+    return admin
+      .messaging()
+      .sendToTopic("News", payload)
+      .then(function (response) {
+        console.log("Notification sent successfully:", response);
+      })
+      .catch(function (error) {
+        console.log("Notification sent failed:", error);
+      });
   });
