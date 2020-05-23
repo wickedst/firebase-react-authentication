@@ -34,6 +34,42 @@ export const AuthProvider = ({ children }: any) => {
   );
 
   useEffect(() => {
+    const messaging = firebase.messaging();
+    messaging.usePublicVapidKey(
+      "BOoIc6H7mU6Lwq6nkGOc_qQXQjhllmhoZZVyblu6v0YLsmi8U8m9EMN373_1oRGHVlHQbIbffTdQyIMSAJfSB14"
+    );
+
+    // Get Instance ID token. Initially this makes a network call, once retrieved
+    // subsequent calls to getToken will return from cache.
+    messaging
+      .getToken()
+      .then((currentToken) => {
+        if (currentToken) {
+          // sendTokenToServer(currentToken);
+          // updateUIForPushEnabled(currentToken);
+          console.log("Have FCM permission ", currentToken);
+        } else {
+          // Show permission request.
+          console.log(
+            "No Instance ID token available. Request permission to generate one."
+          );
+          return messaging.getToken();
+          // Show permission UI.
+          // updateUIForPushPermissionRequired();
+          // setTokenSentToServer(false);
+        }
+      })
+      .catch((err) => {
+        console.log("An error occurred while retrieving token. ", err);
+        // showToken('Error retrieving Instance ID token. ', err);
+        // setTokenSentToServer(false);
+      });
+
+    messaging.onMessage((payload) => {
+      console.log("Message received. ", payload);
+      // ...;
+    });
+
     firebase.auth().onAuthStateChanged((user: any) => {
       setUser(user);
       setLoadingAuthState(false);
