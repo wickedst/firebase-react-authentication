@@ -70,20 +70,37 @@ export const createWallNotification = functions.firestore
 
 export const cloudMessageNotification = functions.firestore
   .document("notifications/{docID}")
-  .onCreate((snap, context) => {
+  .onCreate(async (snap, context) => {
     console.log("[cloudMessageNotification] Context: ", context);
     console.log("[cloudMessageNotification] Snap: ", snap.data());
     const notificationData = snap.data();
+
+    const token = "";
+
+    // const schmoken = await firestoreInstance
+    //   .collection("usersPrivate")
+    //   .doc() // userid
+    //   .get()
+    //   .then((doc: any) => {
+    //     console.log(doc.data().fcmToken);
+    //     return doc.data().fcmToken;
+    //   });
+    // console.log("schmoken", schmoken);
 
     const payload = {
       notification: {
         title: "Test title",
         body: `${notificationData?.message}`,
       },
+      // "data" : {
+      //     "Nick" : "Mario",
+      //   "Room" : "PortugalVSDenmark"
+      // }
     };
+
     return admin
       .messaging()
-      .sendToTopic("News", payload)
+      .sendToDevice(token, payload)
       .then(function (response) {
         console.log("Notification sent successfully:", response);
       })
